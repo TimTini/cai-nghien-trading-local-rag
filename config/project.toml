@@ -15,7 +15,9 @@ default_batch_size = 8
 oldest_first = true
 
 [retrieval]
+backend = "sqlite_fts"
 index_path = "data/analysis/index/search.sqlite"
+chroma_path = "data/analysis/index/chroma"
 default_limit = 5
 min_content_evidence = 1
 
@@ -29,4 +31,3 @@ ollama_models_dir = "models/ollama"
 unknown_answer = "Tôi không biết dựa trên dữ liệu đã phân tích từ kênh này."
 allow_cloud = false
 allow_style_as_fact = false
-

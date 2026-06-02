@@ -9,6 +9,7 @@ from pathlib import Path
 
 from .analyzer import run_local_analysis
 from .chat import answer_question
+from .chroma_index import build_chroma_index
 from .config import load_project_config
 from .knowledge import build_knowledge_chunks
 from .paths import configure_local_environment, ensure_project_tree, resolve_project_root
@@ -67,6 +68,13 @@ def cmd_build_index(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_build_chroma(args: argparse.Namespace) -> int:
+    chunks = build_knowledge_chunks(args.root)
+    count = build_chroma_index(args.root, chunks)
+    print(f"Chunks upserted to Chroma: {count}")
+    return 0
+
+
 def cmd_chat(args: argparse.Namespace) -> int:
     print(answer_question(args.root, args.question, args.limit))
     return 0
@@ -102,6 +110,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     index_parser = subparsers.add_parser("build-index", help="Build/update local retrieval index.")
     index_parser.set_defaults(func=cmd_build_index)
+
+    chroma_parser = subparsers.add_parser("build-chroma", help="Build/update optional project-local Chroma index.")
+    chroma_parser.set_defaults(func=cmd_build_chroma)
 
     chat_parser = subparsers.add_parser("chat", help="Ask a question with evidence retrieval.")
     chat_parser.add_argument("question")

@@ -66,8 +66,11 @@ cnga collect --limit 20 --fetch-sidecars
 # Chuẩn hóa subtitle có sẵn từ YouTube/yt-dlp thành transcript có provenance
 cnga normalize-transcripts
 
-# Build index local từ transcript/OCR/analysis đã có
+# Build index local từ transcript/OCR/analysis đã có (SQLite FTS MVP)
 cnga build-index
+
+# Optional: build Chroma persistent index trong data/analysis/index/chroma
+cnga build-chroma
 
 # Chat có bằng chứng
 cnga chat "Kênh này giải thích quản trị rủi ro như thế nào?"
@@ -79,7 +82,7 @@ Không dùng cloud mặc định.
 
 - Chat: đặt GGUF Qwen3 nhỏ trong `models/chat/`, chạy `llama.cpp` server local, rồi dùng `cnga analyze-local --endpoint http://127.0.0.1:8080/completion`.
 - Vision: đặt Qwen3-VL GGUF trong `models/vision/`; MVP chỉ trích frame/OCR trước, chưa gọi vision tràn lan.
-- Embedding: nếu dùng BGE-M3/sentence-transformers, cache phải nằm trong `.cache/huggingface` và model trong `models/embeddings`.
+- Embedding: `cnga build-chroma` dùng hash embedding local không tải model để tránh cache ngoài project. Khi chuyển sang BGE-M3/sentence-transformers, cache phải nằm trong `.cache/huggingface` và model trong `models/embeddings`.
 - Ollama không được bật mặc định. Chỉ dùng nếu `OLLAMA_MODELS` đã trỏ vào `models/ollama` và `cnga doctor` xác nhận không phát sinh file ngoài project.
 
 ## Kiểm thử
@@ -100,4 +103,3 @@ Các test chính:
 ## Lưu ý pháp lý / vận hành
 
 Pipeline chỉ tải metadata/subtitle mặc định. Audio/video chỉ nên tải khi hợp pháp, cần thiết cho ASR/OCR, và vẫn lưu trong `data/raw` với hash/provenance. Không push dữ liệu, model, cache hoặc log.
-
