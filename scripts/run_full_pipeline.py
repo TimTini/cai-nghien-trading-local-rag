@@ -278,6 +278,11 @@ def run(args: argparse.Namespace) -> int:
     root = Path(args.root).resolve()
     configure_local_environment(root)
     state_path = root / "data" / "analysis" / "state" / f"full_pipeline_{args.content_type}.json"
+    entries = catalog_entries(root, args.content_type)
+    if args.status:
+        print_status(root, entries, state_path)
+        return 0
+
     log_path = root / "logs" / "full-pipeline" / f"{local_stamp()}-{args.content_type}.log"
     state = read_json(
         state_path,
@@ -297,21 +302,19 @@ def run(args: argparse.Namespace) -> int:
             "device": args.device,
             "compute_type": args.compute_type,
             "beam_size": args.beam_size,
+            "status": "running",
+            "runner_pid": os.getpid(),
+            "run_started_at": utc_now(),
             "updated_at": utc_now(),
             "latest_log": project_rel(root, log_path),
         }
     )
     write_json(state_path, state)
 
-    entries = catalog_entries(root, args.content_type)
     if args.end_offset is not None:
         entries_to_run = list(enumerate(entries))[args.start_offset : args.end_offset]
     else:
         entries_to_run = list(enumerate(entries))[args.start_offset :]
-
-    if args.status:
-        print_status(root, entries, state_path)
-        return 0
 
     logger = Logger(log_path)
     failures = 0
