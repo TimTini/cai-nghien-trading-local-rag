@@ -35,7 +35,7 @@ logs/                            # log chạy pipeline
 Chạy từ thư mục project:
 
 ```powershell
-uv sync --extra youtube --extra dev
+uv sync --extra youtube --extra asr --extra ocr --extra dev
 ```
 
 `uv.toml` ép `uv` dùng cache `.cache/uv` và copy package vào `.venv` để project portable hơn.
@@ -43,7 +43,7 @@ uv sync --extra youtube --extra dev
 Nếu cần tác vụ nặng sau này:
 
 ```powershell
-uv sync --extra youtube --extra ml --extra dev
+uv sync --extra youtube --extra ml --extra asr --extra ocr --extra dev
 ```
 
 ## Luồng MVP
@@ -55,6 +55,17 @@ uv run cnga doctor
 
 # Thu catalog metadata, sort từ video cũ nhất tới mới nhất
 uv run cnga collect --limit 20 --fetch-sidecars
+
+# Tải media khi cần ASR/OCR local (oldest-first)
+uv run cnga fetch-audio --limit 5 --content-type regular
+uv run cnga fetch-video-light --limit 5 --content-type regular
+
+# Subtitle chất lượng cao hơn: chạy Whisper large-v3 local trên audio
+uv run cnga asr --limit 5 --content-type regular --model-size large-v3 --device cuda --compute-type float16
+
+# Frame/OCR: trích frame thưa rồi chạy PaddleOCR project-local
+uv run cnga extract-frames --limit 5 --content-type regular
+uv run cnga ocr-frames --limit 5 --content-type regular
 
 # Chuẩn hóa subtitle có sẵn từ YouTube/yt-dlp thành transcript có provenance
 uv run cnga normalize-transcripts

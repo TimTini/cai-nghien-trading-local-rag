@@ -232,7 +232,15 @@ def iter_normalized_segments(root: str | Path | None = None) -> Iterable[Transcr
     transcripts_dir = root_path / config["storage"]["analysis_dir"] / "transcripts"
     if not transcripts_dir.exists():
         return
-    for jsonl_path in sorted(transcripts_dir.glob("*/youtube.jsonl")):
+    preferred_names = ("selected.jsonl", "asr_faster_whisper.jsonl", "youtube.jsonl")
+    available = {path.parent.name: path.parent for path in transcripts_dir.glob("*/*.jsonl")}
+    ordered_video_ids = [video_id for video_id in catalog_video_order(root_path) if video_id in available]
+    ordered_video_ids.extend(sorted(set(available) - set(ordered_video_ids)))
+    for video_id in ordered_video_ids:
+        transcript_dir = transcripts_dir / video_id
+        jsonl_path = next((transcript_dir / name for name in preferred_names if (transcript_dir / name).exists()), None)
+        if jsonl_path is None:
+            continue
         with jsonl_path.open("r", encoding="utf-8") as handle:
             for line in handle:
                 line = line.strip()

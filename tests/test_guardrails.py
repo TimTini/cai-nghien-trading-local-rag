@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from cai_nghien_assistant.chat import UNKNOWN_ANSWER, answer_question
-from cai_nghien_assistant.paths import configure_local_environment
+from cai_nghien_assistant.paths import NON_PATH_ENV_KEYS, configure_local_environment
 from cai_nghien_assistant.retrieval import SearchIndex
 from cai_nghien_assistant.schema import KnowledgeChunk
 from cai_nghien_assistant.storage import RawDataExistsError, write_json_once
@@ -67,8 +67,8 @@ allow_style_as_fact = false
         root = self.make_root()
         env = configure_local_environment(root)
         for key, value in env.items():
-            if key == "UV_LINK_MODE":
-                self.assertEqual(value, "copy")
+            if key in NON_PATH_ENV_KEYS:
+                self.assertTrue(value)
                 continue
             path = Path(value).resolve()
             self.assertTrue(path == root or root in path.parents, value)

@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "cai-nghien-trading-local-rag"
 version = "0.1.0"
 description = "Local evidence-grounded RAG assistant for a YouTube channel corpus."
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.13"
 dependencies = []
 
 [project.optional-dependencies]
@@ -21,6 +21,14 @@ ml = [
   "opencv-python>=4.9",
   "paddleocr>=2.8",
 ]
+asr = [
+  "faster-whisper>=1.1",
+]
+ocr = [
+  # 3.3.1 trips a Windows CPU oneDNN/PIR runtime error on PaddleOCR detection.
+  "paddlepaddle==3.2.2",
+  "paddleocr>=3.5.0",
+]
 dev = [
   "pytest>=8.0",
 ]
@@ -30,4 +38,3 @@ cnga = "cai_nghien_assistant.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-

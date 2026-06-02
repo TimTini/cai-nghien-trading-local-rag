@@ -7,10 +7,11 @@ from pathlib import Path
 from typing import Iterable
 
 from .config import load_project_config
-from .paths import configure_local_environment
+from .paths import configure_local_environment, to_project_relative
 from .schema import KnowledgeChunk, TranscriptSegment
 from .storage import sha256_text, write_jsonl
 from .transcripts import iter_normalized_segments
+from .youtube_collect import load_latest_catalog
 
 
 def chunk_transcript_segments(
@@ -133,13 +134,66 @@ def iter_content_note_chunks(root: str | Path | None = None) -> Iterable[Knowled
                 )
 
 
+def iter_ocr_chunks(root: str | Path | None = None) -> Iterable[KnowledgeChunk]:
+    """Read OCR text from frame analysis as factual screen evidence."""
+
+    root_path = Path(root or ".").resolve()
+    config = load_project_config(root_path)
+    ocr_dir = root_path / config["storage"]["analysis_dir"] / "ocr"
+    if not ocr_dir.exists():
+        return
+
+    catalog = {entry["video_id"]: entry for entry in load_latest_catalog(root_path)}
+    pipeline_version = config["pipeline"]["version"]
+    for path in sorted(ocr_dir.glob("*/ocr.json")):
+        video_id = path.parent.name
+        entry = catalog.get(video_id, {})
+        title = entry.get("title", video_id)
+        published_at = entry.get("published_at") or ""
+        rows = json.loads(path.read_text(encoding="utf-8"))
+        for index, row in enumerate(rows):
+            text = str(row.get("text") or "").strip()
+            if len(text) < 3:
+                continue
+            timestamp = row.get("timestamp")
+            chunk_hash = sha256_text(
+                "|".join(
+                    [
+                        "ocr",
+                        video_id,
+                        str(timestamp),
+                        text,
+                        pipeline_version,
+                    ]
+                )
+            )
+            yield KnowledgeChunk(
+                chunk_id=f"ocr:{video_id}:{index}:{chunk_hash[:16]}",
+                kind="content",
+                video_id=video_id,
+                title=title,
+                published_at=published_at,
+                start=float(timestamp) if timestamp is not None else None,
+                end=float(timestamp) if timestamp is not None else None,
+                text=f"OCR màn hình: {text}",
+                source_type=str(row.get("source_type") or "ocr_paddleocr"),
+                source_path=to_project_relative(path, root_path),
+                pipeline_version=pipeline_version,
+            )
+
+
 def build_knowledge_chunks(root: str | Path | None = None) -> list[KnowledgeChunk]:
     root_path = Path(root or ".").resolve()
     configure_local_environment(root_path)
     config = load_project_config(root_path)
     pipeline_version = config["pipeline"]["version"]
     content_chunks = chunk_transcript_segments(iter_normalized_segments(root_path), pipeline_version)
-    chunks = [*content_chunks, *list(iter_content_note_chunks(root_path)), *list(iter_style_chunks(root_path))]
+    chunks = [
+        *content_chunks,
+        *list(iter_ocr_chunks(root_path)),
+        *list(iter_content_note_chunks(root_path)),
+        *list(iter_style_chunks(root_path)),
+    ]
 
     output_path = root_path / config["storage"]["analysis_dir"] / "chunks.jsonl"
     write_jsonl(output_path, [chunk.to_dict() for chunk in chunks], root_path)

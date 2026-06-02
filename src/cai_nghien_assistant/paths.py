@@ -12,6 +12,14 @@ from typing import Iterable
 
 
 PROJECT_MARKERS = ("config/project.toml", "pyproject.toml")
+NON_PATH_ENV_KEYS = {
+    "UV_LINK_MODE",
+    "PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK",
+    "FLAGS_use_mkldnn",
+    "FLAGS_use_onednn",
+    "PADDLE_DISABLE_MKLDNN",
+    "ONEDNN_VERBOSE",
+}
 
 
 def find_project_root(start: str | Path | None = None) -> Path:
@@ -80,11 +88,14 @@ def ensure_project_tree(root: str | Path | None = None) -> None:
         ".cache/huggingface",
         ".cache/torch",
         ".cache/paddleocr",
+        ".cache/paddlex",
         ".cache/matplotlib",
         ".cache/numba",
         "models/chat",
         "models/vision",
         "models/embeddings",
+        "models/asr",
+        "models/ocr",
         "models/ollama",
     )
     for directory in directories:
@@ -110,6 +121,12 @@ def configure_local_environment(root: str | Path | None = None) -> dict[str, str
         "SENTENCE_TRANSFORMERS_HOME": root_path / "models" / "embeddings",
         "TORCH_HOME": root_path / ".cache" / "torch",
         "PADDLEOCR_HOME": root_path / ".cache" / "paddleocr",
+        "PADDLE_PDX_CACHE_HOME": root_path / "models" / "ocr" / "paddlex",
+        "PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK": "True",
+        "FLAGS_use_mkldnn": "0",
+        "FLAGS_use_onednn": "0",
+        "PADDLE_DISABLE_MKLDNN": "1",
+        "ONEDNN_VERBOSE": "0",
         "MPLCONFIGDIR": root_path / ".cache" / "matplotlib",
         "NUMBA_CACHE_DIR": root_path / ".cache" / "numba",
         "YTDLP_CACHE_DIR": root_path / ".cache" / "yt-dlp",
@@ -121,7 +138,7 @@ def configure_local_environment(root: str | Path | None = None) -> dict[str, str
 
     exported: dict[str, str] = {}
     for key, value in env_paths.items():
-        if key == "UV_LINK_MODE":
+        if key in NON_PATH_ENV_KEYS:
             os.environ[key] = str(value)
             exported[key] = str(value)
             continue

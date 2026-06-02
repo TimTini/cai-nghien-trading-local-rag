@@ -8,11 +8,14 @@ import sys
 from pathlib import Path
 
 from .analyzer import run_local_analysis
+from .asr import asr_batch
 from .chat import answer_question
 from .chroma_index import build_chroma_index
 from .config import load_project_config
+from .frames import extract_frames_batch, ocr_frames_batch
 from .knowledge import build_knowledge_chunks
-from .paths import configure_local_environment, ensure_project_tree, resolve_project_root
+from .media import fetch_audio_batch, fetch_video_light_batch
+from .paths import NON_PATH_ENV_KEYS, configure_local_environment, ensure_project_tree, resolve_project_root
 from .retrieval import SearchIndex
 from .transcripts import normalize_all_transcripts
 from .youtube_collect import collect, fetch_oldest_sidecars
@@ -34,7 +37,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     print(f"Project root: {root}")
     print(f"Channel: {config['channel']['url']}")
     for key, value in sorted(env.items()):
-        if key == "UV_LINK_MODE":
+        if key in NON_PATH_ENV_KEYS:
             print(f"{key}={value}")
             continue
         inside = Path(value).resolve() == root or root in Path(value).resolve().parents
@@ -61,6 +64,61 @@ def cmd_collect(args: argparse.Namespace) -> int:
 def cmd_fetch_sidecars(args: argparse.Namespace) -> int:
     manifests = fetch_oldest_sidecars(args.root, limit=args.limit, content_type=args.content_type)
     print(f"Fetched sidecar manifests: {len(manifests)}")
+    return 0
+
+
+def cmd_fetch_audio(args: argparse.Namespace) -> int:
+    manifests = fetch_audio_batch(args.root, limit=args.limit, content_type=args.content_type, offset=args.offset, force=args.force)
+    print(f"Fetched audio manifests: {len(manifests)}")
+    return 0
+
+
+def cmd_fetch_video_light(args: argparse.Namespace) -> int:
+    manifests = fetch_video_light_batch(args.root, limit=args.limit, content_type=args.content_type, offset=args.offset, force=args.force)
+    print(f"Fetched video-light manifests: {len(manifests)}")
+    return 0
+
+
+def cmd_asr(args: argparse.Namespace) -> int:
+    result = asr_batch(
+        args.root,
+        limit=args.limit,
+        content_type=args.content_type,
+        offset=args.offset,
+        model_size=args.model_size,
+        device=args.device,
+        compute_type=args.compute_type,
+        beam_size=args.beam_size,
+        vad_filter=args.vad_filter,
+        force=args.force,
+    )
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_extract_frames(args: argparse.Namespace) -> int:
+    result = extract_frames_batch(
+        args.root,
+        limit=args.limit,
+        content_type=args.content_type,
+        offset=args.offset,
+        scene_threshold=args.scene_threshold,
+        max_frames=args.max_frames,
+        force=args.force,
+    )
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_ocr_frames(args: argparse.Namespace) -> int:
+    result = ocr_frames_batch(
+        args.root,
+        limit=args.limit,
+        content_type=args.content_type,
+        offset=args.offset,
+        force=args.force,
+    )
+    print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
 
@@ -126,6 +184,48 @@ def build_parser() -> argparse.ArgumentParser:
     sidecars_parser.add_argument("--limit", type=int, default=None)
     sidecars_parser.add_argument("--content-type", choices=["regular", "livestream", "short"], default=None)
     sidecars_parser.set_defaults(func=cmd_fetch_sidecars)
+
+    audio_parser = subparsers.add_parser("fetch-audio", help="Fetch audio-only media from latest catalog, oldest first.")
+    audio_parser.add_argument("--limit", type=int, default=None)
+    audio_parser.add_argument("--offset", type=int, default=0)
+    audio_parser.add_argument("--content-type", choices=["regular", "livestream", "short"], default=None)
+    audio_parser.add_argument("--force", action="store_true")
+    audio_parser.set_defaults(func=cmd_fetch_audio)
+
+    video_parser = subparsers.add_parser("fetch-video-light", help="Fetch video-only light media for frame/OCR analysis.")
+    video_parser.add_argument("--limit", type=int, default=None)
+    video_parser.add_argument("--offset", type=int, default=0)
+    video_parser.add_argument("--content-type", choices=["regular", "livestream", "short"], default=None)
+    video_parser.add_argument("--force", action="store_true")
+    video_parser.set_defaults(func=cmd_fetch_video_light)
+
+    asr_parser = subparsers.add_parser("asr", help="Run local ASR on fetched audio.")
+    asr_parser.add_argument("--limit", type=int, default=None)
+    asr_parser.add_argument("--offset", type=int, default=0)
+    asr_parser.add_argument("--content-type", choices=["regular", "livestream", "short"], default=None)
+    asr_parser.add_argument("--model-size", default="large-v3")
+    asr_parser.add_argument("--device", default="cuda")
+    asr_parser.add_argument("--compute-type", default="float16")
+    asr_parser.add_argument("--beam-size", type=int, default=5)
+    asr_parser.add_argument("--vad-filter", action="store_true", help="Enable VAD. Off by default because it removed speech on some YouTube audio.")
+    asr_parser.add_argument("--force", action="store_true")
+    asr_parser.set_defaults(func=cmd_asr)
+
+    frames_parser = subparsers.add_parser("extract-frames", help="Extract sparse scene frames from fetched video-light files.")
+    frames_parser.add_argument("--limit", type=int, default=None)
+    frames_parser.add_argument("--offset", type=int, default=0)
+    frames_parser.add_argument("--content-type", choices=["regular", "livestream", "short"], default=None)
+    frames_parser.add_argument("--scene-threshold", type=float, default=None)
+    frames_parser.add_argument("--max-frames", type=int, default=None)
+    frames_parser.add_argument("--force", action="store_true")
+    frames_parser.set_defaults(func=cmd_extract_frames)
+
+    ocr_parser = subparsers.add_parser("ocr-frames", help="Run project-local PaddleOCR on extracted frames.")
+    ocr_parser.add_argument("--limit", type=int, default=None)
+    ocr_parser.add_argument("--offset", type=int, default=0)
+    ocr_parser.add_argument("--content-type", choices=["regular", "livestream", "short"], default=None)
+    ocr_parser.add_argument("--force", action="store_true")
+    ocr_parser.set_defaults(func=cmd_ocr_frames)
 
     transcripts_parser = subparsers.add_parser("normalize-transcripts", help="Normalize YouTube subtitle sidecars.")
     transcripts_parser.add_argument("--limit", type=int, default=None)

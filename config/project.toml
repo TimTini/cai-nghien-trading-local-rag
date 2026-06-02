@@ -25,7 +25,15 @@ min_content_evidence = 1
 chat_model_dir = "models/chat"
 vision_model_dir = "models/vision"
 embedding_model_dir = "models/embeddings"
+asr_model_dir = "models/asr"
+ocr_model_dir = "models/ocr"
 ollama_models_dir = "models/ollama"
+
+[media]
+audio_format = "bestaudio[ext=m4a]/bestaudio"
+video_light_format = "bv*[height<=720][ext=mp4]/bv*[height<=720]/bv*[height<=480]/bestvideo"
+frame_scene_threshold = 0.25
+frame_max_per_video = 80
 
 [guardrails]
 unknown_answer = "Tôi không biết dựa trên dữ liệu đã phân tích từ kênh này."
