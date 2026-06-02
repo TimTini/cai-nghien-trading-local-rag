@@ -63,10 +63,11 @@ def extract_candidate_frames(
         str(pattern),
     ]
     completed = subprocess.run(command, check=False, text=True, capture_output=True)
-    if completed.returncode not in {0, 1}:
-        raise RuntimeError(completed.stderr[-2000:])
     timestamps = [float(match.group("time")) for match in PTS_RE.finditer(completed.stderr)]
     frame_files = sorted(output_dir.glob("scene-*.jpg"))
+    no_scene_frames = "No filtered frames" in completed.stderr or "Nothing was written into output file" in completed.stderr
+    if completed.returncode not in {0, 1} and not frame_files and not no_scene_frames:
+        raise RuntimeError(completed.stderr[-2000:])
     if not frame_files:
         fallback = output_dir / "fallback-00001.jpg"
         subprocess.run(
