@@ -139,7 +139,7 @@ def run(args: argparse.Namespace) -> int:
 
         recovered_failures = failed_artifacts_recovered(root, failures)
         if failures and not recovered_failures:
-            log_line(log_path, "failure detected; not auto-resuming until next runner exit")
+            log_line(log_path, "failure detected; retrying after runner exit")
         elif recovered_failures:
             log_line(log_path, "failure artifacts recovered; resume allowed after runner exit")
 
@@ -147,7 +147,7 @@ def run(args: argparse.Namespace) -> int:
             log_line(log_path, "complete")
             return 0
 
-        if not alive and (not failures or recovered_failures):
+        if not alive:
             start_runner(root, args.content_type, state_dir, log_dir, log_path)
 
         if args.once:

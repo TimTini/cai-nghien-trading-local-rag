@@ -28,6 +28,11 @@ if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 STAGES = ("fetch-audio", "fetch-video-light", "asr", "extract-frames", "ocr-frames")
+NATIVE_CRASH_RETURN_CODES = {
+    1073807364,  # Windows native control/terminate event, seen from PaddleOCR.
+    3221225786,  # STATUS_CONTROL_C_EXIT.
+    3221226091,  # Native fail-fast style crash, seen after OCR process failure.
+}
 
 
 def utc_now() -> str:
@@ -353,6 +358,12 @@ def run(args: argparse.Namespace) -> int:
                     video_failed = True
                     mark_stage(video, stage, "failed", return_code=code, error=f"{stage} return_code={code}")
                     logger.line(f"failed video_id={video_id} stage={stage}")
+                    if code in NATIVE_CRASH_RETURN_CODES:
+                        video["status"] = "failed"
+                        state["updated_at"] = utc_now()
+                        logger.line(f"native crash return_code={code}; stopping runner for clean resume")
+                        write_json(state_path, state)
+                        return 2
                     if args.stop_on_error:
                         write_json(state_path, state)
                         return 2
