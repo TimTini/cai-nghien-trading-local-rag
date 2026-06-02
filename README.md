@@ -80,6 +80,24 @@ uv run cnga build-chroma
 uv run cnga chat "Kênh này giải thích quản trị rủi ro như thế nào?"
 ```
 
+## Chạy full pipeline có log/resume
+
+Runner dưới đây chạy từng video theo thứ tự cũ nhất, ghi log/state trong project
+và tự bỏ qua artifact đã có:
+
+```powershell
+uv run python scripts/run_full_pipeline.py --root H:\test --content-type regular --status
+uv run python scripts/run_full_pipeline.py --root H:\test --content-type regular
+```
+
+File chính:
+
+- State resume: `data/analysis/state/full_pipeline_regular.json`
+- Log mỗi lần chạy: `logs/full-pipeline/*.log`
+
+Nếu bị dừng giữa chừng, chạy lại đúng lệnh trên. Runner sẽ kiểm tra artifact
+`audio`, `video-light`, `asr`, `frames`, `ocr` trước khi chạy stage tiếp theo.
+
 ## Model local
 
 Không dùng cloud mặc định.
