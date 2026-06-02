@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cai-nghien-trading-local-rag"
+version = "0.1.0"
+description = "Local evidence-grounded RAG assistant for a YouTube channel corpus."
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+youtube = [
+  "yt-dlp>=2025.1.1",
+  "youtube-transcript-api>=0.6.2",
+]
+ml = [
+  "chromadb>=0.5",
+  "sentence-transformers>=3.0",
+  "faster-whisper>=1.0",
+  "opencv-python>=4.9",
+  "paddleocr>=2.8",
+]
+dev = [
+  "pytest>=8.0",
+]
+
+[project.scripts]
+cnga = "cai_nghien_assistant.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+

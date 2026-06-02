@@ -1,0 +1,32 @@
+[channel]
+url = "https://www.youtube.com/@cainghientrading"
+default_tab = "videos"
+
+[storage]
+raw_dir = "data/raw"
+analysis_dir = "data/analysis"
+logs_dir = "logs"
+cache_dir = ".cache"
+models_dir = "models"
+
+[pipeline]
+version = "0.1.0"
+default_batch_size = 8
+oldest_first = true
+
+[retrieval]
+index_path = "data/analysis/index/search.sqlite"
+default_limit = 5
+min_content_evidence = 1
+
+[models]
+chat_model_dir = "models/chat"
+vision_model_dir = "models/vision"
+embedding_model_dir = "models/embeddings"
+ollama_models_dir = "models/ollama"
+
+[guardrails]
+unknown_answer = "Tôi không biết dựa trên dữ liệu đã phân tích từ kênh này."
+allow_cloud = false
+allow_style_as_fact = false
+

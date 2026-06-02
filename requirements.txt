@@ -1,0 +1,9 @@
+# Minimal editable install.
+-e .
+
+# Optional YouTube collection extras:
+# -e ".[youtube]"
+
+# Optional heavy local ML stack:
+# -e ".[ml]"
+
