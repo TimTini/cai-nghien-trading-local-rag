@@ -17,7 +17,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from run_full_pipeline import STAGES, catalog_entries, read_json, summarize, utc_now, write_json
+from run_full_pipeline import STAGES, artifact_ok, catalog_entries, read_json, summarize, utc_now, write_json
 
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -71,6 +71,12 @@ def failed_stages(state: dict[str, Any]) -> list[tuple[int | None, str, str, str
             if stage_data.get("status") == "failed":
                 failed.append((item.get("offset"), video_id, stage, str(stage_data.get("error") or "")))
     return sorted(failed, key=lambda row: (row[0] if row[0] is not None else 999999, row[1], row[2]))
+
+
+def failed_artifacts_recovered(root: Path, failures: list[tuple[int | None, str, str, str]]) -> bool:
+    if not failures:
+        return False
+    return all(artifact_ok(root, video_id, stage) for _, video_id, stage, _ in failures)
 
 
 def is_complete(summary: dict[str, int]) -> bool:
@@ -131,14 +137,17 @@ def run(args: argparse.Namespace) -> int:
         )
         log_line(log_path, message)
 
-        if failures:
+        recovered_failures = failed_artifacts_recovered(root, failures)
+        if failures and not recovered_failures:
             log_line(log_path, "failure detected; not auto-resuming until next runner exit")
+        elif recovered_failures:
+            log_line(log_path, "failure artifacts recovered; resume allowed after runner exit")
 
         if is_complete(summary):
             log_line(log_path, "complete")
             return 0
 
-        if not alive and not failures:
+        if not alive and (not failures or recovered_failures):
             start_runner(root, args.content_type, state_dir, log_dir, log_path)
 
         if args.once:
