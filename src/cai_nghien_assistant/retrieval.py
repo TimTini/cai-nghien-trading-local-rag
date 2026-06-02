@@ -82,6 +82,12 @@ class SearchIndex:
         row = self.connection.execute("SELECT COUNT(*) AS count FROM chunks").fetchone()
         return int(row["count"])
 
+    def clear(self) -> None:
+        self.connection.execute("DELETE FROM chunks")
+        if self.fts_enabled:
+            self.connection.execute("DELETE FROM chunks_fts")
+        self.connection.commit()
+
     def upsert_chunks(self, chunks: Iterable[KnowledgeChunk]) -> int:
         changed = 0
         for chunk in chunks:
@@ -117,6 +123,10 @@ class SearchIndex:
                 )
         self.connection.commit()
         return changed
+
+    def replace_chunks(self, chunks: Iterable[KnowledgeChunk]) -> int:
+        self.clear()
+        return self.upsert_chunks(chunks)
 
     def _search_fts(self, query: str, kind: str, limit: int) -> list[Evidence]:
         terms = query_terms(query)

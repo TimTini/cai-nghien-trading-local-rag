@@ -30,50 +30,43 @@ logs/                            # log chạy pipeline
 .cache/                          # cache thư viện được ép nằm trong project
 ```
 
-## Cài đặt đề xuất
+## Cài đặt bằng uv
 
 Chạy từ thư mục project:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -U pip
-python -m pip install -e .
+uv sync --extra youtube --extra dev
 ```
 
-Nếu cần thu thập YouTube:
-
-```powershell
-python -m pip install yt-dlp youtube-transcript-api
-```
+`uv.toml` ép `uv` dùng cache `.cache/uv` và copy package vào `.venv` để project portable hơn.
 
 Nếu cần tác vụ nặng sau này:
 
 ```powershell
-python -m pip install -e ".[ml]"
+uv sync --extra youtube --extra ml --extra dev
 ```
 
 ## Luồng MVP
 
 ```powershell
 # Tạo cây thư mục local và ép cache thư viện vào project
-cnga init
-cnga doctor
+uv run cnga init
+uv run cnga doctor
 
 # Thu catalog metadata, sort từ video cũ nhất tới mới nhất
-cnga collect --limit 20 --fetch-sidecars
+uv run cnga collect --limit 20 --fetch-sidecars
 
 # Chuẩn hóa subtitle có sẵn từ YouTube/yt-dlp thành transcript có provenance
-cnga normalize-transcripts
+uv run cnga normalize-transcripts
 
 # Build index local từ transcript/OCR/analysis đã có (SQLite FTS MVP)
-cnga build-index
+uv run cnga build-index
 
 # Optional: build Chroma persistent index trong data/analysis/index/chroma
-cnga build-chroma
+uv run cnga build-chroma
 
 # Chat có bằng chứng
-cnga chat "Kênh này giải thích quản trị rủi ro như thế nào?"
+uv run cnga chat "Kênh này giải thích quản trị rủi ro như thế nào?"
 ```
 
 ## Model local
@@ -88,7 +81,7 @@ Không dùng cloud mặc định.
 ## Kiểm thử
 
 ```powershell
-python -m unittest discover -s tests
+uv run python -m unittest discover -s tests
 ```
 
 Các test chính:

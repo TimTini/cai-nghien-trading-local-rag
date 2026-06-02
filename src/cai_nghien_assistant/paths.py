@@ -113,13 +113,19 @@ def configure_local_environment(root: str | Path | None = None) -> dict[str, str
         "MPLCONFIGDIR": root_path / ".cache" / "matplotlib",
         "NUMBA_CACHE_DIR": root_path / ".cache" / "numba",
         "YTDLP_CACHE_DIR": root_path / ".cache" / "yt-dlp",
+        "UV_CACHE_DIR": root_path / ".cache" / "uv",
+        "PIP_CACHE_DIR": root_path / ".cache" / "pip",
+        "UV_LINK_MODE": "copy",
         "OLLAMA_MODELS": root_path / "models" / "ollama",
     }
 
     exported: dict[str, str] = {}
     for key, value in env_paths.items():
+        if key == "UV_LINK_MODE":
+            os.environ[key] = str(value)
+            exported[key] = str(value)
+            continue
         target = assert_inside_project(value, root_path) if key != "CNGA_PROJECT_ROOT" else root_path
         os.environ[key] = str(target)
         exported[key] = str(target)
     return exported
-

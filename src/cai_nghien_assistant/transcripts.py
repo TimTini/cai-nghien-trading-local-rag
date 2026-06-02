@@ -36,10 +36,15 @@ def clean_subtitle_text(text: str) -> str:
     return text.strip()
 
 
+def _clean_vtt_line(line: str) -> str:
+    return clean_subtitle_text(line)
+
+
 def parse_vtt(path: str | Path) -> list[tuple[float, float, str]]:
     cues: list[tuple[float, float, str]] = []
     lines = Path(path).read_text(encoding="utf-8", errors="ignore").splitlines()
     idx = 0
+    previous_text = ""
     while idx < len(lines):
         match = TIMESTAMP_RE.search(lines[idx])
         if not match:
@@ -50,11 +55,18 @@ def parse_vtt(path: str | Path) -> list[tuple[float, float, str]]:
         idx += 1
         text_lines: list[str] = []
         while idx < len(lines) and lines[idx].strip():
-            text_lines.append(lines[idx])
+            cleaned = _clean_vtt_line(lines[idx])
+            if cleaned:
+                text_lines.append(cleaned)
             idx += 1
+        while text_lines and text_lines[0] == previous_text:
+            text_lines.pop(0)
         text = clean_subtitle_text(" ".join(text_lines))
+        if text == previous_text:
+            text = ""
         if text:
             cues.append((start, end, text))
+            previous_text = text
         idx += 1
     return cues
 
@@ -85,6 +97,15 @@ def subtitle_priority(path: Path) -> tuple[int, str]:
     return (language_rank + format_rank, name)
 
 
+def subtitle_language(path: Path) -> str | None:
+    name = path.name.lower()
+    if ".vi" in name:
+        return "vi"
+    if ".en" in name:
+        return "en"
+    return None
+
+
 def find_subtitle_files(video_dir: Path) -> list[Path]:
     candidates = [
         path
@@ -92,6 +113,10 @@ def find_subtitle_files(video_dir: Path) -> list[Path]:
         if path.is_file() and path.suffix.lower() in {".vtt", ".json3", ".srv3"}
     ]
     return sorted(candidates, key=subtitle_priority)
+
+
+def has_sidecar_payload(video_dir: Path) -> bool:
+    return (video_dir / "manifest.json").exists() or bool(find_subtitle_files(video_dir))
 
 
 def _load_manifest(video_dir: Path) -> dict[str, Any]:
@@ -153,7 +178,7 @@ def normalize_video_transcript(root: str | Path | None, video_id: str) -> int:
             text=text,
             source_type="youtube_subtitle",
             source_path=to_project_relative(source_file, root_path),
-            language="vi" if ".vi" in source_file.name.lower() else None,
+            language=subtitle_language(source_file),
         ).to_dict()
         for start, end, text in parsed
     ]
@@ -161,7 +186,22 @@ def normalize_video_transcript(root: str | Path | None, video_id: str) -> int:
     return len(rows)
 
 
-def normalize_all_transcripts(root: str | Path | None = None) -> dict[str, int]:
+def catalog_video_order(root: str | Path | None = None) -> list[str]:
+    root_path = Path(root or ".").resolve()
+    config = load_project_config(root_path)
+    catalog_path = root_path / config["storage"]["analysis_dir"] / "state" / "latest_catalog.jsonl"
+    if not catalog_path.exists():
+        return []
+    rows = [json.loads(line) for line in catalog_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    rows.sort(key=lambda item: (item.get("published_at") or "9999-99-99", item.get("video_id") or ""))
+    return [row["video_id"] for row in rows if row.get("video_id")]
+
+
+def normalize_all_transcripts(
+    root: str | Path | None = None,
+    limit: int | None = None,
+    content_type: str | None = None,
+) -> dict[str, int]:
     root_path = Path(root or ".").resolve()
     configure_local_environment(root_path)
     config = load_project_config(root_path)
@@ -169,8 +209,20 @@ def normalize_all_transcripts(root: str | Path | None = None) -> dict[str, int]:
     result: dict[str, int] = {}
     if not videos_dir.exists():
         return result
-    for video_dir in sorted(path for path in videos_dir.iterdir() if path.is_dir()):
-        result[video_dir.name] = normalize_video_transcript(root_path, video_dir.name)
+    available = {path.name for path in videos_dir.iterdir() if path.is_dir() and has_sidecar_payload(path)}
+    catalog_path = root_path / config["storage"]["analysis_dir"] / "state" / "latest_catalog.jsonl"
+    catalog_rows = []
+    if catalog_path.exists():
+        catalog_rows = [json.loads(line) for line in catalog_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        catalog_rows.sort(key=lambda item: (item.get("published_at") or "9999-99-99", item.get("video_id") or ""))
+    if content_type:
+        catalog_rows = [row for row in catalog_rows if row.get("content_type") == content_type]
+    ordered = [row["video_id"] for row in catalog_rows if row.get("video_id") in available]
+    ordered.extend(sorted(available - set(ordered)))
+    if limit:
+        ordered = ordered[:limit]
+    for video_id in ordered:
+        result[video_id] = normalize_video_transcript(root_path, video_id)
     return result
 
 
@@ -187,4 +239,3 @@ def iter_normalized_segments(root: str | Path | None = None) -> Iterable[Transcr
                 if not line:
                     continue
                 yield TranscriptSegment(**json.loads(line))
-

@@ -66,7 +66,10 @@ allow_style_as_fact = false
     def test_env_paths_stay_inside_project(self) -> None:
         root = self.make_root()
         env = configure_local_environment(root)
-        for value in env.values():
+        for key, value in env.items():
+            if key == "UV_LINK_MODE":
+                self.assertEqual(value, "copy")
+                continue
             path = Path(value).resolve()
             self.assertTrue(path == root or root in path.parents, value)
 
@@ -111,4 +114,3 @@ allow_style_as_fact = false
 
 if __name__ == "__main__":
     unittest.main()
-

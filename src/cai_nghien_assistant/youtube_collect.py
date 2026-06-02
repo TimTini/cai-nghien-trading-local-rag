@@ -14,7 +14,7 @@ from typing import Any
 
 from .config import load_project_config
 from .paths import configure_local_environment, to_project_relative
-from .storage import sha256_file, write_jsonl, write_jsonl_once
+from .storage import atomic_write_json, sha256_file, write_jsonl, write_jsonl_once
 
 
 def _import_ytdlp():
@@ -72,7 +72,110 @@ def normalize_catalog_entry(entry: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def collect_channel_catalog(root: str | Path | None = None, channel_url: str | None = None, limit: int | None = None) -> list[dict[str, Any]]:
+def _raw_metadata_snapshot(info: dict[str, Any]) -> dict[str, Any]:
+    """Keep original metadata fields needed by the project without huge format lists."""
+
+    wanted_keys = (
+        "id",
+        "title",
+        "description",
+        "upload_date",
+        "release_date",
+        "timestamp",
+        "duration",
+        "webpage_url",
+        "thumbnail",
+        "thumbnails",
+        "subtitles",
+        "automatic_captions",
+        "live_status",
+        "channel",
+        "channel_id",
+        "uploader",
+        "uploader_id",
+    )
+    return {key: info.get(key) for key in wanted_keys if key in info}
+
+
+def fetch_video_metadata(root: str | Path | None, entry: dict[str, Any], stamp: str | None = None) -> dict[str, Any]:
+    """Fetch one video's full metadata and persist an immutable raw snapshot."""
+
+    root_path = Path(root or ".").resolve()
+    configure_local_environment(root_path)
+    config = load_project_config(root_path)
+    yt_dlp = _import_ytdlp()
+
+    raw_dir = root_path / config["storage"]["raw_dir"]
+    analysis_dir = root_path / config["storage"]["analysis_dir"]
+    cache_dir = root_path / config["storage"]["cache_dir"] / "yt-dlp"
+    video_id = entry["video_id"]
+    latest_path = analysis_dir / "state" / "video_metadata" / f"{video_id}.json"
+    if latest_path.exists():
+        latest = json.loads(latest_path.read_text(encoding="utf-8"))
+        if latest.get("published_at"):
+            merged = {**entry, **latest}
+            return merged
+
+    options = {
+        "ignoreerrors": True,
+        "quiet": True,
+        "skip_download": True,
+        "cachedir": str(cache_dir),
+        "paths": {"home": str(raw_dir / "videos" / video_id)},
+    }
+    with yt_dlp.YoutubeDL(options) as ydl:
+        info = ydl.extract_info(entry["url"], download=False) or {}
+
+    normalized = normalize_catalog_entry({**entry, **info})
+    snapshot = {
+        "collected_at": stamp or _timestamp(),
+        "normalized": normalized,
+        "raw_metadata": _raw_metadata_snapshot(info),
+    }
+    metadata_dir = raw_dir / "videos" / video_id / "metadata"
+    write_jsonl_once(metadata_dir / f"metadata-{snapshot['collected_at']}.jsonl", [snapshot], root_path)
+    atomic_write_json(latest_path, normalized, root_path)
+    return normalized
+
+
+def enrich_catalog_entries(
+    root: str | Path | None,
+    entries: list[dict[str, Any]],
+    force: bool = False,
+) -> list[dict[str, Any]]:
+    """Ensure catalog entries have upload dates before oldest-first processing."""
+
+    stamp = _timestamp()
+    enriched: list[dict[str, Any]] = []
+    for index, entry in enumerate(entries, start=1):
+        if force or not entry.get("published_at"):
+            print(f"[metadata] {index}/{len(entries)} {entry['video_id']}")
+            enriched.append(fetch_video_metadata(root, entry, stamp=stamp))
+        else:
+            enriched.append(entry)
+    return enriched
+
+
+def sort_oldest_first(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return sorted(entries, key=lambda item: (item.get("published_at") or "9999-99-99", item["video_id"]))
+
+
+def load_latest_catalog(root: str | Path | None = None) -> list[dict[str, Any]]:
+    root_path = Path(root or ".").resolve()
+    config = load_project_config(root_path)
+    catalog_path = root_path / config["storage"]["analysis_dir"] / "state" / "latest_catalog.jsonl"
+    if not catalog_path.exists():
+        return []
+    entries = [json.loads(line) for line in catalog_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return sort_oldest_first(entries)
+
+
+def collect_channel_catalog(
+    root: str | Path | None = None,
+    channel_url: str | None = None,
+    limit: int | None = None,
+    enrich_metadata: bool = True,
+) -> list[dict[str, Any]]:
     """Collect a channel catalog snapshot and write it as immutable raw data."""
 
     root_path = Path(root or ".").resolve()
@@ -100,7 +203,9 @@ def collect_channel_catalog(root: str | Path | None = None, channel_url: str | N
 
     entries = [normalize_catalog_entry(item) for item in (info or {}).get("entries", []) if item]
     entries = [item for item in entries if item["video_id"]]
-    entries.sort(key=lambda item: (item.get("published_at") or "9999-99-99", item["video_id"]))
+    if enrich_metadata:
+        entries = enrich_catalog_entries(root_path, entries)
+    entries = sort_oldest_first(entries)
     if limit:
         entries = entries[:limit]
 
@@ -163,10 +268,41 @@ def fetch_video_sidecars(root: str | Path | None, entry: dict[str, Any]) -> dict
     return manifest
 
 
-def collect(root: str | Path | None = None, limit: int | None = None, fetch_sidecars: bool = False) -> list[dict[str, Any]]:
-    entries = collect_channel_catalog(root=root, limit=limit)
+def collect(
+    root: str | Path | None = None,
+    limit: int | None = None,
+    fetch_sidecars: bool = False,
+    sidecar_limit: int | None = None,
+    enrich_metadata: bool = True,
+) -> list[dict[str, Any]]:
+    entries = collect_channel_catalog(root=root, limit=limit, enrich_metadata=enrich_metadata)
     if fetch_sidecars:
-        for entry in entries:
+        selected = entries[:sidecar_limit] if sidecar_limit else entries
+        for entry in selected:
             fetch_video_sidecars(root, entry)
     return entries
 
+
+def fetch_oldest_sidecars(
+    root: str | Path | None = None,
+    limit: int | None = None,
+    content_type: str | None = None,
+) -> list[dict[str, Any]]:
+    """Fetch subtitle/info sidecars from the already dated catalog, oldest first."""
+
+    root_path = Path(root or ".").resolve()
+    entries = load_latest_catalog(root_path)
+    if not entries:
+        entries = collect_channel_catalog(root_path)
+    if content_type:
+        entries = [entry for entry in entries if entry.get("content_type") == content_type]
+    selected = entries[:limit] if limit else entries
+    manifests: list[dict[str, Any]] = []
+    for index, entry in enumerate(selected, start=1):
+        print(
+            "[sidecars] "
+            f"{index}/{len(selected)} {entry.get('published_at') or 'unknown-date'} "
+            f"{entry['video_id']} {entry.get('title', '')}"
+        )
+        manifests.append(fetch_video_sidecars(root_path, entry))
+    return manifests

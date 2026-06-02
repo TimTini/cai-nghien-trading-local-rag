@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+*.egg-info/
 
 # Local generated project state. Keep everything portable, but do not commit it.
 data/
@@ -18,4 +19,3 @@ logs/
 *.sqlite
 *.sqlite3
 *.db
-

@@ -15,7 +15,7 @@ from .knowledge import build_knowledge_chunks
 from .paths import configure_local_environment, ensure_project_tree, resolve_project_root
 from .retrieval import SearchIndex
 from .transcripts import normalize_all_transcripts
-from .youtube_collect import collect
+from .youtube_collect import collect, fetch_oldest_sidecars
 
 
 def cmd_init(args: argparse.Namespace) -> int:
@@ -34,13 +34,22 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     print(f"Project root: {root}")
     print(f"Channel: {config['channel']['url']}")
     for key, value in sorted(env.items()):
+        if key == "UV_LINK_MODE":
+            print(f"{key}={value}")
+            continue
         inside = Path(value).resolve() == root or root in Path(value).resolve().parents
         print(f"{key}={value} inside_project={inside}")
     return 0
 
 
 def cmd_collect(args: argparse.Namespace) -> int:
-    entries = collect(root=args.root, limit=args.limit, fetch_sidecars=args.fetch_sidecars)
+    entries = collect(
+        root=args.root,
+        limit=args.limit,
+        fetch_sidecars=args.fetch_sidecars,
+        sidecar_limit=args.sidecar_limit,
+        enrich_metadata=not args.no_enrich_metadata,
+    )
     print(f"Collected catalog entries: {len(entries)}")
     counts: dict[str, int] = {}
     for entry in entries:
@@ -49,9 +58,15 @@ def cmd_collect(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_fetch_sidecars(args: argparse.Namespace) -> int:
+    manifests = fetch_oldest_sidecars(args.root, limit=args.limit, content_type=args.content_type)
+    print(f"Fetched sidecar manifests: {len(manifests)}")
+    return 0
+
+
 def cmd_normalize_transcripts(args: argparse.Namespace) -> int:
-    result = normalize_all_transcripts(args.root)
-    print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+    result = normalize_all_transcripts(args.root, limit=args.limit, content_type=args.content_type)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
 
@@ -59,9 +74,9 @@ def cmd_build_index(args: argparse.Namespace) -> int:
     chunks = build_knowledge_chunks(args.root)
     index = SearchIndex.from_project(args.root)
     try:
-        changed = index.upsert_chunks(chunks)
+        changed = index.replace_chunks(chunks)
         print(f"Chunks prepared: {len(chunks)}")
-        print(f"New chunks indexed: {changed}")
+        print(f"Chunks indexed: {changed}")
         print(f"Total chunks indexed: {index.count_chunks()}")
     finally:
         index.close()
@@ -103,9 +118,18 @@ def build_parser() -> argparse.ArgumentParser:
     collect_parser = subparsers.add_parser("collect", help="Collect channel catalog and optional sidecars.")
     collect_parser.add_argument("--limit", type=int, default=None)
     collect_parser.add_argument("--fetch-sidecars", action="store_true")
+    collect_parser.add_argument("--sidecar-limit", type=int, default=None, help="Fetch sidecars only for the first N oldest entries.")
+    collect_parser.add_argument("--no-enrich-metadata", action="store_true", help="Skip per-video metadata fetch.")
     collect_parser.set_defaults(func=cmd_collect)
 
+    sidecars_parser = subparsers.add_parser("fetch-sidecars", help="Fetch sidecars from latest dated catalog, oldest first.")
+    sidecars_parser.add_argument("--limit", type=int, default=None)
+    sidecars_parser.add_argument("--content-type", choices=["regular", "livestream", "short"], default=None)
+    sidecars_parser.set_defaults(func=cmd_fetch_sidecars)
+
     transcripts_parser = subparsers.add_parser("normalize-transcripts", help="Normalize YouTube subtitle sidecars.")
+    transcripts_parser.add_argument("--limit", type=int, default=None)
+    transcripts_parser.add_argument("--content-type", choices=["regular", "livestream", "short"], default=None)
     transcripts_parser.set_defaults(func=cmd_normalize_transcripts)
 
     index_parser = subparsers.add_parser("build-index", help="Build/update local retrieval index.")
