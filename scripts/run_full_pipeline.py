@@ -59,14 +59,20 @@ class Logger:
 
     def line(self, text: str = "") -> None:
         message = f"[{dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {text}"
-        print(message, flush=True)
         self.handle.write(message + "\n")
         self.handle.flush()
+        try:
+            print(message, flush=True)
+        except Exception:
+            pass
 
     def raw(self, text: str) -> None:
-        print(text, end="", flush=True)
         self.handle.write(text)
         self.handle.flush()
+        try:
+            print(text, end="", flush=True)
+        except Exception:
+            pass
 
     def close(self) -> None:
         self.handle.close()
