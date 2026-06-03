@@ -33,6 +33,10 @@ NATIVE_CRASH_RETURN_CODES = {
     3221225786,  # STATUS_CONTROL_C_EXIT.
     3221226091,  # Native fail-fast style crash, seen after OCR process failure.
 }
+UNAVAILABLE_VIDEO_MARKERS = (
+    "This video is not available",
+    "Video unavailable",
+)
 
 
 def utc_now() -> str:
@@ -202,7 +206,7 @@ def stage_command(args: argparse.Namespace, stage: str, offset: int) -> list[str
     return command
 
 
-def run_command(command: list[str], root: Path, logger: Logger) -> int:
+def run_command(command: list[str], root: Path, logger: Logger) -> tuple[int, str]:
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"
     env["CNGA_PROJECT_ROOT"] = str(root)
@@ -219,12 +223,18 @@ def run_command(command: list[str], root: Path, logger: Logger) -> int:
         errors="replace",
     )
     assert process.stdout is not None
+    output_parts: list[str] = []
     for line in process.stdout:
+        output_parts.append(line)
         logger.raw(line)
     return_code = process.wait()
     elapsed = time.monotonic() - started
     logger.line(f"exit={return_code} elapsed={elapsed:.1f}s")
-    return return_code
+    return return_code, "".join(output_parts)
+
+
+def output_says_video_unavailable(output: str) -> bool:
+    return any(marker in output for marker in UNAVAILABLE_VIDEO_MARKERS)
 
 
 def video_state(state: dict[str, Any], entry: dict[str, Any], offset: int) -> dict[str, Any]:
@@ -323,6 +333,7 @@ def run(args: argparse.Namespace) -> int:
 
     logger = Logger(log_path)
     failures = 0
+    run_failures: list[dict[str, Any]] = []
     processed_since_index = 0
     try:
         logger.line(f"root={root}")
@@ -349,29 +360,46 @@ def run(args: argparse.Namespace) -> int:
                 mark_stage(video, stage, "running", started_at=utc_now())
                 state["updated_at"] = utc_now()
                 write_json(state_path, state)
-                code = run_command(stage_command(args, stage, offset), root, logger)
+                code, output = run_command(stage_command(args, stage, offset), root, logger)
                 if code == 0 and not artifact_ok(root, video_id, stage):
+                    if stage in {"fetch-audio", "fetch-video-light"} and output_says_video_unavailable(output):
+                        mark_stage(video, stage, "skipped", reason="video-unavailable", return_code=code)
+                        logger.line(f"{stage} unavailable; skipping video_id={video_id}")
+                        state["updated_at"] = utc_now()
+                        write_json(state_path, state)
+                        continue
                     logger.line(f"{stage} returned 0 but artifact is missing; retrying once with --force")
-                    code = run_command(stage_command(args, stage, offset) + ["--force"], root, logger)
+                    code, output = run_command(stage_command(args, stage, offset) + ["--force"], root, logger)
                 if code == 0 and artifact_ok(root, video_id, stage):
                     mark_stage(video, stage, "done", return_code=code)
                     processed_since_index += 1
                 else:
+                    if stage in {"fetch-audio", "fetch-video-light"} and output_says_video_unavailable(output):
+                        mark_stage(video, stage, "skipped", reason="video-unavailable", return_code=code)
+                        logger.line(f"{stage} unavailable; skipping video_id={video_id}")
+                        state["updated_at"] = utc_now()
+                        state["failures"] = run_failures
+                        write_json(state_path, state)
+                        continue
                     failures += 1
                     video_failed = True
                     mark_stage(video, stage, "failed", return_code=code, error=f"{stage} return_code={code}")
+                    run_failures.append({"video_id": video_id, "stage": stage, "error": f"{stage} return_code={code}"})
                     logger.line(f"failed video_id={video_id} stage={stage}")
                     if code in NATIVE_CRASH_RETURN_CODES:
                         video["status"] = "failed"
                         state["updated_at"] = utc_now()
+                        state["failures"] = run_failures
                         logger.line(f"native crash return_code={code}; stopping runner for clean resume")
                         write_json(state_path, state)
                         return 2
                     if args.stop_on_error:
+                        state["failures"] = run_failures
                         write_json(state_path, state)
                         return 2
                     break
                 state["updated_at"] = utc_now()
+                state["failures"] = run_failures
                 write_json(state_path, state)
 
             if not video_failed:
@@ -391,6 +419,7 @@ def run(args: argparse.Namespace) -> int:
         state["last_summary"] = final_summary
         state["finished_at"] = utc_now()
         state["status"] = "failed" if failures else "done"
+        state["failures"] = run_failures
         write_json(state_path, state)
         return 2 if failures else 0
     finally:
