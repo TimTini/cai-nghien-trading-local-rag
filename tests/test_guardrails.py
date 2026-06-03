@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+import importlib.util
+import types
 import tempfile
 import unittest
 from pathlib import Path
@@ -14,6 +16,15 @@ from cai_nghien_assistant.storage import RawDataExistsError, write_json_once
 
 
 class GuardrailTests(unittest.TestCase):
+    def load_runner(self):
+        script_path = Path(__file__).resolve().parents[1] / "scripts" / "run_full_pipeline.py"
+        spec = importlib.util.spec_from_file_location("run_full_pipeline_for_tests", script_path)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
     def make_root(self) -> Path:
         root = Path(tempfile.mkdtemp())
         (root / "config").mkdir()
@@ -80,6 +91,33 @@ allow_style_as_fact = false
         self.assertTrue(any("ext=webm" in selector for selector in selectors[1:]))
         self.assertTrue(any("best[height<=720]" in selector for selector in selectors[1:]))
 
+    def test_runner_clears_stale_stage_error_on_recovery(self) -> None:
+        runner = self.load_runner()
+        video = {"stages": {"fetch-audio": {"status": "failed", "error": "fetch-audio return_code=0"}}}
+        runner.mark_stage(video, "fetch-audio", "done", reason="artifact-present")
+        self.assertNotIn("error", video["stages"]["fetch-audio"])
+
+    def test_build_index_records_scalar_return_code(self) -> None:
+        runner = self.load_runner()
+        root = self.make_root()
+        state_path = root / "state.json"
+        state = {}
+
+        class FakeLogger:
+            def line(self, message: str) -> None:
+                pass
+
+        original_run_command = runner.run_command
+        try:
+            runner.run_command = lambda command, root, logger: (0, "Chunks indexed: 1\n")
+            return_code = runner.build_index(types.SimpleNamespace(), root, FakeLogger(), state, state_path)
+        finally:
+            runner.run_command = original_run_command
+
+        self.assertEqual(return_code, 0)
+        self.assertEqual(state["index_runs"][-1]["status"], "done")
+        self.assertEqual(state["index_runs"][-1]["return_code"], 0)
+
     def test_index_upsert_is_idempotent(self) -> None:
         root = self.make_root()
         index = SearchIndex.from_project(root)
@@ -95,6 +133,36 @@ allow_style_as_fact = false
         index = SearchIndex.from_project(root)
         index.close()
         self.assertEqual(answer_question(root, "không có dữ liệu"), UNKNOWN_ANSWER)
+
+    def test_chat_refuses_off_domain_partial_term_matches(self) -> None:
+        root = self.make_root()
+        index = SearchIndex.from_project(root)
+        try:
+            index.upsert_chunks(
+                [
+                    self.chunk(chunk_id="content:v1:pho", text="Cố mai làm bát phở rồi quay lại xem chart."),
+                    self.chunk(chunk_id="content:v1:formula", text="Công thức chia vốn khi chạy bot DCA."),
+                ]
+            )
+        finally:
+            index.close()
+        self.assertEqual(answer_question(root, "Công thức nấu phở bò là gì?"), UNKNOWN_ANSWER)
+
+    def test_chat_answers_when_content_evidence_matches_question(self) -> None:
+        root = self.make_root()
+        index = SearchIndex.from_project(root)
+        try:
+            index.upsert_chunks(
+                [
+                    self.chunk(
+                        chunk_id="content:v1:risk",
+                        text="Quản trị rủi ro trong trade bot là chia vốn, kiểm soát lệnh và không all-in.",
+                    )
+                ]
+            )
+        finally:
+            index.close()
+        self.assertIn("Quản trị rủi ro", answer_question(root, "Quản trị rủi ro là gì?"))
 
     def test_style_evidence_is_not_fact_evidence(self) -> None:
         root = self.make_root()

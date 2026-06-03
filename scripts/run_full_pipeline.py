@@ -256,6 +256,8 @@ def video_state(state: dict[str, Any], entry: dict[str, Any], offset: int) -> di
 def mark_stage(video: dict[str, Any], stage: str, status: str, **extra: Any) -> None:
     stage_data = video.setdefault("stages", {}).setdefault(stage, {})
     stage_data.update({"status": status, "updated_at": utc_now(), **extra})
+    if status != "failed" and "error" not in extra:
+        stage_data.pop("error", None)
 
 
 def summarize(root: Path, entries: list[dict[str, Any]]) -> dict[str, int]:
@@ -282,7 +284,9 @@ def print_status(root: Path, entries: list[dict[str, Any]], state_path: Path) ->
 
 def build_index(args: argparse.Namespace, root: Path, logger: Logger, state: dict[str, Any], state_path: Path) -> int:
     logger.line("build-index")
-    code = run_command([sys.executable, "-m", "cai_nghien_assistant.cli", "--root", str(root), "build-index"], root, logger)
+    code, _output = run_command(
+        [sys.executable, "-m", "cai_nghien_assistant.cli", "--root", str(root), "build-index"], root, logger
+    )
     state.setdefault("index_runs", []).append({"status": "done" if code == 0 else "failed", "return_code": code, "at": utc_now()})
     state["updated_at"] = utc_now()
     write_json(state_path, state)
