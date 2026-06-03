@@ -1,0 +1,29 @@
+[model]
+# Repo-local GGUF model for the first console chatbot.
+# Chosen because Qwen3 is multilingual and this quantization is small enough
+# for a practical CPU/GPU local smoke test.
+source_model = "Qwen/Qwen3-4B-Instruct-2507"
+repo_id = "lmstudio-community/Qwen3-4B-Instruct-2507-GGUF"
+filename = "Qwen3-4B-Instruct-2507-Q4_K_M.gguf"
+relative_dir = "models/chat/qwen3-4b-instruct-2507-gguf"
+
+[runtime]
+# CPU by default. Set n_gpu_layers to -1 or a positive number later if llama.cpp
+# is installed with CUDA/Metal support.
+n_ctx = 8192
+n_threads = 0
+n_gpu_layers = 0
+temperature = 0.3
+top_p = 0.8
+top_k = 20
+repeat_penalty = 1.1
+max_tokens = 900
+
+[rag]
+# Pull a larger pool from the existing local index, then sort usable evidence by
+# published_at descending before giving it to the model.
+pool_limit = 30
+limit = 8
+style_limit = 3
+min_content_evidence = 1
+prefer_newest = true
