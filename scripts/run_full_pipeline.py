@@ -263,7 +263,7 @@ def print_status(root: Path, entries: list[dict[str, Any]], state_path: Path) ->
         failures = []
         for video_id, item in (state.get("videos") or {}).items():
             for stage, stage_data in (item.get("stages") or {}).items():
-                if stage_data.get("status") == "failed":
+                if stage_data.get("status") == "failed" and not artifact_ok(root, video_id, stage):
                     failures.append({"video_id": video_id, "stage": stage, "error": stage_data.get("error", "")})
         if failures:
             print("failures:")
@@ -350,6 +350,9 @@ def run(args: argparse.Namespace) -> int:
                 state["updated_at"] = utc_now()
                 write_json(state_path, state)
                 code = run_command(stage_command(args, stage, offset), root, logger)
+                if code == 0 and not artifact_ok(root, video_id, stage):
+                    logger.line(f"{stage} returned 0 but artifact is missing; retrying once with --force")
+                    code = run_command(stage_command(args, stage, offset) + ["--force"], root, logger)
                 if code == 0 and artifact_ok(root, video_id, stage):
                     mark_stage(video, stage, "done", return_code=code)
                     processed_since_index += 1

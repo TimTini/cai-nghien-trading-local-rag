@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from cai_nghien_assistant.chat import UNKNOWN_ANSWER, answer_question
+from cai_nghien_assistant.media import _fallback_selectors
 from cai_nghien_assistant.paths import NON_PATH_ENV_KEYS, configure_local_environment
 from cai_nghien_assistant.retrieval import SearchIndex
 from cai_nghien_assistant.schema import KnowledgeChunk
@@ -72,6 +73,12 @@ allow_style_as_fact = false
                 continue
             path = Path(value).resolve()
             self.assertTrue(path == root or root in path.parents, value)
+
+    def test_audio_download_has_non_m4a_fallbacks(self) -> None:
+        selectors = _fallback_selectors("audio", "bestaudio[ext=m4a]/bestaudio")
+        self.assertEqual(selectors[0], "bestaudio[ext=m4a]/bestaudio")
+        self.assertTrue(any("ext=webm" in selector for selector in selectors[1:]))
+        self.assertTrue(any("best[height<=720]" in selector for selector in selectors[1:]))
 
     def test_index_upsert_is_idempotent(self) -> None:
         root = self.make_root()

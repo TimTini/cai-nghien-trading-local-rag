@@ -68,6 +68,13 @@ def _media_files(media_dir: Path, manifest_path: Path, root_path: Path) -> list[
 
 def _fallback_selectors(media_kind: str, format_selector: str) -> list[str]:
     selectors = [format_selector]
+    if media_kind == "audio":
+        selectors.extend(
+            [
+                "bestaudio[ext=webm]/bestaudio/best[height<=720][ext=mp4]/best[height<=480][ext=mp4]/best",
+                "bestaudio/best",
+            ]
+        )
     if media_kind == "video-light":
         selectors.extend(
             [
@@ -126,8 +133,7 @@ def download_media_track(
         files = _media_files(media_dir, manifest_path, root_path)
         if files:
             break
-        if media_kind == "video-light":
-            print(f"[video-light] no media file for selector={selected_format!r}; trying fallback")
+        print(f"[{media_kind}] no media file for selector={selected_format!r}; trying fallback")
 
     manifest = {
         "video_id": video_id,
