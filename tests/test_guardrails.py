@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import importlib.util
+import json
 import types
 import tempfile
 import unittest
@@ -117,6 +118,33 @@ allow_style_as_fact = false
         self.assertEqual(return_code, 0)
         self.assertEqual(state["index_runs"][-1]["status"], "done")
         self.assertEqual(state["index_runs"][-1]["return_code"], 0)
+
+    def test_runner_default_catalog_includes_regular_and_livestream(self) -> None:
+        runner = self.load_runner()
+        root = self.make_root()
+        catalog_path = root / "data" / "analysis" / "state" / "latest_catalog.jsonl"
+        catalog_path.parent.mkdir(parents=True, exist_ok=True)
+        rows = [
+            {"video_id": "regular-1", "content_type": "regular"},
+            {"video_id": "live-1", "content_type": "livestream"},
+            {"video_id": "short-1", "content_type": "short"},
+        ]
+        catalog_path.write_text("\n".join(json.dumps(row) for row in rows), encoding="utf-8")
+
+        selected_ids = [entry["video_id"] for entry in runner.catalog_entries(root, "regular+livestream")]
+        self.assertEqual(set(selected_ids), {"regular-1", "live-1"})
+        self.assertNotIn("short-1", selected_ids)
+
+    def test_runner_default_stage_command_uses_combined_catalog_offsets(self) -> None:
+        runner = self.load_runner()
+        args = types.SimpleNamespace(root=Path("H:/test"), content_type="regular+livestream")
+        command = runner.stage_command(args, "fetch-audio", 193)
+        self.assertNotIn("--content-type", command)
+
+        args.content_type = "regular"
+        command = runner.stage_command(args, "fetch-audio", 193)
+        self.assertIn("--content-type", command)
+        self.assertIn("regular", command)
 
     def test_index_upsert_is_idempotent(self) -> None:
         root = self.make_root()

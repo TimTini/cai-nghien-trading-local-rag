@@ -28,6 +28,7 @@ if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 STAGES = ("fetch-audio", "fetch-video-light", "asr", "extract-frames", "ocr-frames")
+DEFAULT_CONTENT_TYPES = ("regular", "livestream")
 NATIVE_CRASH_RETURN_CODES = {
     1073807364,  # Windows native control/terminate event, seen from PaddleOCR.
     3221225786,  # STATUS_CONTROL_C_EXIT.
@@ -91,10 +92,30 @@ def project_rel(root: Path, path: Path) -> str:
     return path.resolve().relative_to(root.resolve()).as_posix()
 
 
+def selected_content_types(content_type: str) -> tuple[str, ...]:
+    if content_type == "regular+livestream":
+        return DEFAULT_CONTENT_TYPES
+    if content_type == "all":
+        return ()
+    return (content_type,)
+
+
+def state_content_type_label(content_type: str) -> str:
+    return content_type.replace("+", "_")
+
+
+def cli_content_type(content_type: str) -> str | None:
+    if content_type in {"regular+livestream", "all"}:
+        return None
+    return content_type
+
+
 def catalog_entries(root: Path, content_type: str) -> list[dict[str, Any]]:
     entries = load_latest_catalog(root)
-    if content_type:
-        entries = [entry for entry in entries if entry.get("content_type") == content_type]
+    selected = selected_content_types(content_type)
+    if selected:
+        selected_set = set(selected)
+        entries = [entry for entry in entries if entry.get("content_type") in selected_set]
     return entries
 
 
@@ -185,9 +206,10 @@ def stage_command(args: argparse.Namespace, stage: str, offset: int) -> list[str
         "1",
         "--offset",
         str(offset),
-        "--content-type",
-        args.content_type,
     ]
+    content_type = cli_content_type(args.content_type)
+    if content_type:
+        command.extend(["--content-type", content_type])
     if stage == "asr":
         command.extend(
             [
@@ -296,13 +318,14 @@ def build_index(args: argparse.Namespace, root: Path, logger: Logger, state: dic
 def run(args: argparse.Namespace) -> int:
     root = Path(args.root).resolve()
     configure_local_environment(root)
-    state_path = root / "data" / "analysis" / "state" / f"full_pipeline_{args.content_type}.json"
+    state_label = state_content_type_label(args.content_type)
+    state_path = root / "data" / "analysis" / "state" / f"full_pipeline_{state_label}.json"
     entries = catalog_entries(root, args.content_type)
     if args.status:
         print_status(root, entries, state_path)
         return 0
 
-    log_path = root / "logs" / "full-pipeline" / f"{local_stamp()}-{args.content_type}.log"
+    log_path = root / "logs" / "full-pipeline" / f"{local_stamp()}-{state_label}.log"
     state = read_json(
         state_path,
         {
@@ -433,7 +456,12 @@ def run(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Unattended cnga full pipeline runner with log/resume.")
     parser.add_argument("--root", default=".", type=Path)
-    parser.add_argument("--content-type", default="regular", choices=["regular", "livestream", "short"])
+    parser.add_argument(
+        "--content-type",
+        default="regular+livestream",
+        choices=["regular+livestream", "regular", "livestream", "short", "all"],
+        help="Default runs regular videos and livestreams together. Use regular/livestream to force one type.",
+    )
     parser.add_argument("--start-offset", type=int, default=0)
     parser.add_argument("--end-offset", type=int, default=None)
     parser.add_argument("--model-size", default="large-v3")
