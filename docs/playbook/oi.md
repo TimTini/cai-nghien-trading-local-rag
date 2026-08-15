@@ -36,6 +36,6 @@ Không có bộ số đường nào “đúng là tín hiệu”.
 
 ## Không có trong chương này
 
-Không có bộ lọc “vào lệnh khi OI/mcap trên X”. Không có danh sách sàn hay app để soi số. Không có tín hiệu FOMO theo nến.
+Không có bộ số “thấy X thì mua ngay”. Không có tên sàn hay app. Số ngưỡng trong chương research là cách thu danh sách lúc dạy, không phải lệnh sống.
 
-Đọc số liệu là kiến thức. Biến số liệu thành lệnh trên nền tảng chưa cấp phép tại Việt Nam thì không đưa lên sách public.
+Đọc số liệu là kiến thức. Không kêu mở tài khoản trên nền tảng chưa cấp phép.

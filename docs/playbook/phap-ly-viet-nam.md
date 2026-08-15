@@ -40,4 +40,4 @@ Cho đến khi Bộ Tài chính / Ủy ban Chứng khoán Nhà nước **công b
 
 ## Video cũ của kênh
 
-Video năm 2026 có thể nói về sàn nước ngoài, bot, sự kiện điểm. Phần đó **không đưa vào sách public** vì không phù hợp khung quảng cáo / cung cấp dịch vụ trong Nghị quyết 05.
+Video năm 2026 có thể nói tên sàn nước ngoài, sự kiện điểm, copy bot. **Tên sàn / khuyến mãi / copy bot** không đưa vào sách public. Kiến thức chạy máy và research (không kèm tên sàn) nằm ở các chương bot, hậu kỳ, OI, research.

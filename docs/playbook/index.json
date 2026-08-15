@@ -75,7 +75,7 @@
     },
     {
       "topic_id": "bot",
-      "title": "Bot giao dịch (khái niệm)",
+      "title": "Bot lưới và bot DCA (cách máy chạy)",
       "file": "bot.md",
       "keywords": [
         "bot",
@@ -85,7 +85,27 @@
         "máy",
         "tự động",
         "trung lập",
-        "cô lập"
+        "futures",
+        "bước giá",
+        "đòn bẩy"
+      ]
+    },
+    {
+      "topic_id": "hau_ky",
+      "title": "Hậu kỳ bot: đọc số, dừng, chốt",
+      "file": "hau-ky-bot.md",
+      "keywords": [
+        "hậu kỳ",
+        "hau ky",
+        "dừng bot",
+        "dung bot",
+        "chốt",
+        "chot",
+        "rút lãi",
+        "đóng bot",
+        "p&l",
+        "ký quỹ",
+        "sửa lưới"
       ]
     },
     {
@@ -101,6 +121,19 @@
         "long",
         "short",
         "thanh khoản"
+      ]
+    },
+    {
+      "topic_id": "research",
+      "title": "Research coin (đọc số, không phải lệnh mua)",
+      "file": "research-coin.md",
+      "keywords": [
+        "research",
+        "lọc coin",
+        "checklist",
+        "mcap",
+        "nến đứt",
+        "đường trung bình"
       ]
     },
     {
