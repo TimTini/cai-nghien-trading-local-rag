@@ -1,6 +1,6 @@
 # Hậu kỳ bot: đọc số, dừng, chốt
 
-Kiến thức vận hành máy sau khi đã chạy. Không có tên sàn. Không có mã lỗi của một nền tảng.
+Kiến thức vận hành máy sau khi đã chạy.
 
 ## Đóng máy thì cầm về bao nhiêu?
 
@@ -64,7 +64,3 @@ Nếu mọi mức mua an toàn đã khớp hết, kế hoạch trung bình giá 
 Tạo lại: copy setting, chỉ nhập lại số tiền. Dùng khi máy đang hiệu quả. Lưới thường đòi số tiền tạo lớn nên lãi kép kiểu này dễ hơn với DCA. Khá rủi ro; vốn nhỏ thì được.
 
 Đảo chiều (long thành short) cùng setting: hai máy lưới ngược nhau có thể cùng ăn hoặc cùng đổ — không giống hedge an toàn. Hơi khát bạc, không phải chặn rủi ro.
-
-## Không có trong chương này
-
-Không có tên sàn, không có tên nút của một app, không có copy bot.

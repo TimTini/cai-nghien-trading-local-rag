@@ -33,9 +33,3 @@ Dùng một chỉ số rồi lao vào là cách mất tiền đã được kể 
 Công cụ vẽ giá (đường trung bình và tương tự) trên đồng **không có khối lượng** chỉ là hình trang trí. Số liệu đẹp mà không ai mua-bán thì không thành quyết định.
 
 Không có bộ số đường nào “đúng là tín hiệu”.
-
-## Không có trong chương này
-
-Không có bộ số “thấy X thì mua ngay”. Không có tên sàn hay app. Số ngưỡng trong chương research là cách thu danh sách lúc dạy, không phải lệnh sống.
-
-Đọc số liệu là kiến thức. Không kêu mở tài khoản trên nền tảng chưa cấp phép.

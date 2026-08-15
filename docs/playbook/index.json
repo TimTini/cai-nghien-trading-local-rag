@@ -1,18 +1,6 @@
 {
   "chapters": [
     {
-      "topic_id": "pham_vi",
-      "title": "Phạm vi sách (lọc theo pháp luật Việt Nam)",
-      "file": "pham-vi.md",
-      "keywords": [
-        "phạm vi",
-        "gỡ",
-        "nghị quyết 05",
-        "không hướng dẫn",
-        "quảng cáo"
-      ]
-    },
-    {
       "topic_id": "phap_ly",
       "title": "Pháp lý tài sản mã hóa tại Việt Nam",
       "file": "phap-ly-viet-nam.md",

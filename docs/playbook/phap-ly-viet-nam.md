@@ -37,7 +37,3 @@ Cho đến khi Bộ Tài chính / Ủy ban Chứng khoán Nhà nước **công b
 2. **Không chuyển tiền** vào sàn / app tự nhận đã được cấp phép khi chưa có xác nhận trên kênh chính thức. Lừa đảo bám tin Nghị quyết 05 là dạng đã được cảnh báo.
 3. Không tham gia mời gọi đầu tư “tiền mã hóa chắc lãi”, “bot thu nhập thụ động”, copy lệnh từ người lạ.
 4. Không hướng dẫn hay quảng cáo giao dịch trên nền tảng chưa được cấp phép tại Việt Nam.
-
-## Video cũ của kênh
-
-Video năm 2026 có thể nói tên sàn nước ngoài, sự kiện điểm, copy bot. **Tên sàn / khuyến mãi / copy bot** không đưa vào sách public. Kiến thức chạy máy và research (không kèm tên sàn) nằm ở các chương bot, hậu kỳ, OI, research.

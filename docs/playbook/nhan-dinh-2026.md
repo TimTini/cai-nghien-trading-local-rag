@@ -2,7 +2,7 @@
 
 Đây là **ảnh chụp lời video theo ngày**, không phải lệnh mua bán và không phải nhận định sống. Đọc kèm ngày. Không dùng để “vào lúc này”.
 
-Nguồn: video `-Uo77NEuE-E`, ngày **2026-04-08**.
+Ngày **2026-04-08**.
 
 ## Bitcoin quý 1/2026 (lúc quay)
 
@@ -18,8 +18,4 @@ Lịch sử được nhắc: tháng 4 Bitcoin tăng 10/15 năm (2011–2025), tr
 
 Video bảo theo dõi quý 2: Fed có cắt lãi không, ETF có tiền vào không, Trung Đông có hạ nhiệt không. Đó là câu hỏi lúc quay, không phải tín hiệu.
 
-## Không có trong chương này
-
-Không có vùng giá mua. Không có “đáy vào tháng nào”. Không có “bắt đầu máy / DCA khi giá dưới X”. Không có hướng dẫn dầu / vàng / sàn.
-
-Số liệu trên là lời video ngày 08/4/2026. Tự đối chiếu nguồn gốc nếu cần; sách không cập nhật số sống.
+Số liệu trên là lời video ngày 08/4/2026. Không cập nhật số sống.

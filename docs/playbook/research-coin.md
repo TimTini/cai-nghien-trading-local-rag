@@ -1,6 +1,6 @@
 # Research coin (đọc số, không phải lệnh mua)
 
-Cách **đọc** đồng trước khi nghĩ tới máy. Dùng đủ bộ, không tin một chỉ số rời. Không có tên app / sàn. Số ngưỡng lúc dạy là cách thu hẹp danh sách để **quan sát**, không phải “thấy số là vào”.
+Cách **đọc** đồng trước khi nghĩ tới máy. Dùng đủ bộ, không tin một chỉ số rời. Số ngưỡng lúc dạy là cách thu hẹp danh sách để **quan sát**, không phải “thấy số là vào”.
 
 Đọc thêm chương Open Interest (OI).
 
@@ -21,8 +21,6 @@ Ba tầng này thu cả nghìn đồng còn khoảng mười mấy. Ưu tiên x�
 ## OI khác volume
 
 Volume cộng cả lệnh mở rồi đóng ngay. OI chỉ cộng khi vị thế còn đang giữ. Volume hay bị làm đẹp (cày khối lượng) nên OI mới là số then chốt; kết hợp OI với volume mới ra bộ lọc khỏe.
-
-Chi tiết: chương OI.
 
 ## Short đông chưa phải tín hiệu vào lệnh
 
@@ -51,14 +49,10 @@ Tin số liệu, đừng tin “con này sẽ lên”. Research là tìm bất t
 
 Xu hướng lên lúc dạy đọc: giá trên đường trung bình 34, rồi 89, rồi 200. Khung ngày ít đồng đạt; H4 dễ hơn nhưng tín hiệu yếu hơn. Mọi data đẹp mà khối lượng không đủ lớn thì vô nghĩa. Dưới khoảng 100 triệu thì đợi hoặc size rất nhỏ.
 
-Đường trung bình trên đồng không có người mua-bán chỉ là hình. Xem chương OI.
+Đường trung bình trên đồng không có người mua-bán chỉ là hình.
 
 ## Khi nào để ý chốt (cách đọc bảng lúc dạy)
 
 Lúc dạy nhìn % biến động khung ngắn và volume khung H4 trên bảng số liệu nhiều nơi. Khi cả hai đổi trạng thái xấu, hoặc một hàng xấu rõ, thì để ý / nghĩ tới chốt. Cột realtime hơn chờ nến đóng.
 
 Đây là cách **đọc bảng**, không phải lệnh sống “bán ngay khi màu X”.
-
-## Không có trong chương này
-
-Không có tên sàn, không có tên app, không có “mở lệnh tại…”.

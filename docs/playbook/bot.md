@@ -1,6 +1,6 @@
 # Bot lưới và bot DCA (cách máy chạy)
 
-Kiến thức về **cơ chế máy**. Không có tên sàn. Không kêu mở tài khoản. Máy không bảo đảm lãi. Nhận định sai hướng vẫn mất hết số đã bỏ vào con bot đó.
+Kiến thức về **cơ chế máy**. Máy không bảo đảm lãi. Nhận định sai hướng vẫn mất hết số đã bỏ vào con bot đó.
 
 Số ví dụ lúc dạy là thói quen demo, **không phải chén thánh**.
 
@@ -51,7 +51,7 @@ Bot lưới: mua nhiều điểm, bán nhiều điểm. Bot DCA: mua ở nhiều
 
 ## DCA đồng nào thì hợp, đồng nào thì không
 
-DCA theo thời gian: chia nhỏ mua theo ngày/tuần/tháng. Lúc dạy: với Bitcoin, khi đã giảm quá 50% từ đỉnh thì mới bắt đầu mua đều. Chỉ hợp đồng có tăng trưởng lâu dài và đỉnh mùa này còn có cửa cao hơn đỉnh mùa trước — lúc dạy nêu Bitcoin, ETH, SOL, BNB. Không nêu tên sàn.
+DCA theo thời gian: chia nhỏ mua theo ngày/tuần/tháng. Lúc dạy: với Bitcoin, khi đã giảm quá 50% từ đỉnh thì mới bắt đầu mua đều. Chỉ hợp đồng có tăng trưởng lâu dài và đỉnh mùa này còn có cửa cao hơn đỉnh mùa trước — lúc dạy nêu Bitcoin, ETH, SOL, BNB.
 
 Không DCA dài hạn alt mỏng: sau một mùa dễ mất hút, khó về bờ; alt loại đó chỉ lướt, không trung bình giá dài.
 
@@ -64,7 +64,7 @@ Không DCA dài hạn alt mỏng: sau một mùa dễ mất hút, khó về bờ
 
 Mọi DCA phải có điểm cắt trước. Không cắt rồi bơm tiền.
 
-## Thông số máy DCA — ý nghĩa, không phải chén thánh
+## Thông số máy DCA — ý nghĩa (demo)
 
 Lúc dạy hay nói (demo):
 
@@ -86,7 +86,7 @@ Muốn ít tiền + lãi nhiều + đòn bẩy cao thì bắt buộc ký quỹ t
 
 Bot DCA cùng một hướng (thường long) hợp khi không chắc điểm mua. Short khó hơn; lúc dạy short bằng bot lưới.
 
-Điểm mạnh: đánh ngược xu hướng vẫn có lãi nếu nhịp giảm có hồi. Giảm một mạch không hồi thì cháy hoặc dính cắt lỗ. Máy không phải chén thánh.
+Điểm mạnh: đánh ngược xu hướng vẫn có lãi nếu nhịp giảm có hồi. Giảm một mạch không hồi thì cháy hoặc dính cắt lỗ.
 
 Tuổi thọ lúc dạy: sống khoảng 3 tháng là có thể gọi thành công. Ít máy chạy được lâu như vậy. Thanh khoản yếu thì DCA không sống lâu — vẫn phải hiểu cách máy chạy.
 
@@ -94,7 +94,7 @@ Máy hai chiều / trung lập: không gắn sẵn long hay short. Giá lên đ�
 
 ## Trước khi tạo: vẽ rủi ro trên đồ thị
 
-Thứ tự lúc dạy (nguyên tắc, không phải menu một sàn):
+Thứ tự lúc dạy:
 
 1. Xác định lực xả nhiều nhất không hồi trên khung từ H4 trở lên (không đo H1).
 2. Vẽ trên đồ thị điểm cháy / thanh lý mình chấp nhận.
@@ -108,7 +108,3 @@ Chưa vạch rủi ro trên đồ thị thì chưa tạo. Máy không thay view.
 ## Đọc số, dừng, sửa
 
 Xem chương **Hậu kỳ bot**. Tóm tắt: nhìn tiền lãi-lỗ thật, không nhìn % chart; tách túi; sửa giữa chừng là máy khác; khớp hết mức an toàn = kế hoạch cũ đã xong.
-
-## Không có trong chương này
-
-Không có tên sàn. Không có copy bot / hoa hồng. Không có “mở tài khoản tại…”.

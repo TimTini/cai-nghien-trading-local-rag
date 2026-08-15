@@ -1,6 +1,4 @@
-# Rủi ro tiền bạc (không hướng dẫn lệnh)
-
-Chỉ giữ nguyên tắc bảo vệ tiền sinh hoạt. Không hướng dẫn bot, đòn bẩy, hay sàn cụ thể.
+# Rủi ro tiền bạc
 
 ## Chỉ dùng số tiền chấp nhận mất hết
 
@@ -25,7 +23,3 @@ Phần mềm, bot, “chuyên gia” copy lệnh không bảo đảm lãi. Nhậ
 ## Muốn giữ tiền thì đừng để mất tiền
 
 Ưu tiên không mất vốn sinh hoạt, không all-in, không tin “x100”. Kiến thức và kỷ luật chi tiêu đứng trước mọi công cụ.
-
-## Không phải lời khuyên đầu tư
-
-Nội dung giáo dục. Mọi quyết định tài chính là trách nhiệm người đọc. Đối chiếu pháp luật Việt Nam (xem chương pháp lý).

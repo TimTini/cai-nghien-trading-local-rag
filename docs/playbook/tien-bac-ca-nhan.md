@@ -1,6 +1,6 @@
 # Tiền bạc cá nhân (lương Việt)
 
-Nguồn ý: video `a2GcLzOfqP8` (2026-05-02), chỉ giữ phần chi tiêu / quỹ dự phòng. Không hướng dẫn mua bán tài sản mã hóa.
+Số lãi / lạm phát dưới đây theo lời video ngày **2026-05-02**.
 
 ## 50/30/20 kiểu Mỹ gãy với lương 10 triệu
 
@@ -16,4 +16,4 @@ Lời video: đừng coi kênh rủi ro cao là phương án thoát nghèo nhanh
 
 ## Lạm phát và lãi tiết kiệm (tham khảo lúc quay)
 
-Lời tóm tắt cuối video: lạm phát khoảng 4% và lãi suất khoảng 6% — gửi không kỳ hạn / không có kế hoạch thì sức mua vẫn bị bào. Đây là nhận xét giáo dục về chi tiêu, không phải lời khuyên gửi ngân hàng hay mua tài sản nào.
+Lời tóm tắt cuối video: lạm phát khoảng 4% và lãi suất khoảng 6% — gửi không kỳ hạn / không có kế hoạch thì sức mua vẫn bị bào.
