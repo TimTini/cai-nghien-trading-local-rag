@@ -70,6 +70,34 @@
         "kỷ luật",
         "dyor"
       ]
+    },
+    {
+      "topic_id": "bot",
+      "title": "Bot giao dịch (khái niệm)",
+      "file": "bot.md",
+      "keywords": [
+        "bot",
+        "lưới",
+        "grid",
+        "dca",
+        "máy",
+        "tự động"
+      ]
+    },
+    {
+      "topic_id": "oi",
+      "title": "Open Interest (OI)",
+      "file": "oi.md",
+      "keywords": [
+        "oi",
+        "open interest",
+        "volume",
+        "vốn hóa",
+        "unlock",
+        "long",
+        "short",
+        "thanh khoản"
+      ]
     }
   ]
 }

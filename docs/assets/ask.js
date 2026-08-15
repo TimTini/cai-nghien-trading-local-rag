@@ -6,12 +6,21 @@ async function loadPages() {
   return response.json();
 }
 
+function keywordInQuestion(needle, lowered) {
+  if (needle.length <= 3) {
+    const escaped = needle.replace(/[.*+?^${}()|[\]\]/g, "\$&");
+    const re = new RegExp("(?<![a-zà-ỹ0-9])" + escaped + "(?![a-zà-ỹ0-9])", "i");
+    return re.test(lowered);
+  }
+  return lowered.includes(needle);
+}
+
 function chapterScore(question, chapter) {
   const lowered = question.toLowerCase();
   let hits = 0;
   for (const keyword of chapter.keywords || []) {
     const needle = String(keyword).trim().toLowerCase();
-    if (needle.length >= 2 && lowered.includes(needle)) {
+    if (needle.length >= 2 && keywordInQuestion(needle, lowered)) {
       hits += 1;
     }
   }

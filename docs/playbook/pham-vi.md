@@ -12,11 +12,13 @@ Theo **Nghị quyết số 05/2025/NQ-CP** (09/9/2025) về thí điểm thị t
 - Công an các địa phương đã cảnh báo: lợi dụng Nghị quyết 05 để mời gọi đầu tư qua sàn không rõ nguồn, tự xưng “đã cấp phép”. **Chưa có sàn nào được công bố cấp phép chính thức** cho đến khi Bộ Tài chính / cơ quan có thẩm quyền công bố danh sách.
 - Sau **6 tháng** kể từ khi tổ chức cung cấp dịch vụ đầu tiên được cấp phép, nhà đầu tư trong nước giao dịch tài sản mã hóa **không qua** tổ chức được cấp phép có thể bị xử lý hành chính hoặc hình sự (theo Nghị quyết).
 
-Do đó sách **không còn** hướng dẫn:
+Do đó sách **không** đưa hướng dẫn thao tác trên sàn cụ thể:
 
-- Cài bot, đòn bẩy, chốt lời / dừng lỗ trên sàn nước ngoài (OKX, BingX, …)
-- Sự kiện điểm, copy bot, hoa hồng, TRADEFI dầu/vàng trên sàn chưa cấp phép tại Việt Nam
-- Lọc coin / tín hiệu vào lệnh / “tiếp tục DCA” / vùng giá mua cụ thể
+- Cài máy, đòn bẩy, bấm nút chốt/dừng trên một nền tảng mang tên
+- Sự kiện điểm, copy bot, hoa hồng, đánh dầu/vàng trên sàn chưa cấp phép
+- Bộ lọc “vào lệnh khi …”, vùng giá mua, “tiếp tục DCA”
+
+**Khái niệm** bot lưới / DCA và **Open Interest** vẫn giữ: đó là kiến thức cơ chế và số liệu, không phải quảng cáo dịch vụ.
 
 ## Còn lại
 
@@ -24,3 +26,4 @@ Do đó sách **không còn** hướng dẫn:
 - Rủi ro chung: không dùng tiền sinh hoạt để đánh bạc tài chính
 - Tâm lý: đừng quyết định lúc hoảng, đừng tin “chắc lãi”
 - Pháp lý: đọc Nghị quyết 05, chỉ tin danh sách cấp phép chính thức
+- Bot (khái niệm lưới / DCA) và OI (số liệu, không phải lệnh)

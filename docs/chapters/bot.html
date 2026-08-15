@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bot giao dịch (khái niệm)</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header class="wrap">
+    <p class="brand"><a href="../index.html">Cai Nghện Trading — sách kiến thức</a></p>
+    <p class="note">Giáo dục / tham khảo — không phải lời khuyên đầu tư. Không hướng dẫn giao dịch trên sàn chưa được Bộ Tài chính cấp phép.</p>
+  </header>
+  <main class="wrap">
+    <p><a href="../index.html">← Mục lục</a></p>
+    <h1>Bot giao dịch (khái niệm)</h1>
+<p>Đây là kiến thức về <strong>cơ chế</strong>, không phải hướng dẫn mở tài khoản hay cài máy trên một sàn cụ thể.</p>
+<p>Bot không bảo đảm lãi. Máy chỉ lặp lại lệnh đã kê. Nhận định sai hướng vẫn mất hết số tiền đã bỏ vào con bot đó.</p>
+<h2>Bot lưới</h2>
+<p>Bot lưới kê sẵn nhiều mức mua và bán trong <strong>một khoảng giá</strong>. Giá dao động trong khoảng thì bot khớp từng nhịp nhỏ (mua thấp hơn / bán cao hơn trong lưới). Không cần bắt đúng một điểm đỉnh hay đáy.</p>
+<p>Giới hạn:</p>
+<ul>
+<li>Ngoài khoảng giá đã kê, bot ngừng mua-bán theo lưới. Lệnh còn sót phải xử lý như lệnh thường.</li>
+<li>Lãi từng nhịp nhỏ không có nghĩa bot bất tử. Vẫn có kịch bản mất hết số đã gắn vào bot.</li>
+<li>Bot không thay nhận định hướng. “Không vào thì tiếc, vào rồi thì run” là vấn đề tâm lý; máy không sửa view sai.</li>
+</ul>
+<h2>Bot DCA (trung bình giá)</h2>
+<p>DCA nghĩa là mua thêm khi giá đi ngược, rồi chốt <strong>một điểm</strong> khi giá trung bình hồi đủ một khoảng đã chọn. Khác lưới: lưới vừa mua vừa bán nhiều điểm; DCA chủ yếu xếp lệnh cùng một hướng rồi chốt cả cụm.</p>
+<p>Giới hạn:</p>
+<ul>
+<li>Có nhịp hồi thì cơ chế mới chạy được. Giá đi một mạch không hồi thì số đã xếp có thể mất hết.</li>
+<li>Nhồi thêm khi đang lỗ (kéo giá vốn) làm rủi ro lớn hơn, không phải “cách cứu lệnh”.</li>
+<li>Sống được vài tháng không phải bảo chứng. Thanh khoản kém thì cơ chế khớp chậm hoặc kẹt.</li>
+</ul>
+<h2>Rủi ro cần nhớ</h2>
+<ul>
+<li>Chỉ bỏ vào bot số tiền chấp nhận mất hết. Tiền thuê nhà / ăn uống không thuộc nhóm này.</li>
+<li>Công cụ nhân số lần (đòn bẩy) làm lỗ lớn hơn số mình tưởng. Không có mức nhân “không cháy”.</li>
+<li>Thêm tiền vào bot đang chạy để “cho lì hơn” thì khi cháy mất cả phần thêm.</li>
+<li>Không phó mặc 100% cho máy. Không tin “bot = thu nhập thụ động”.</li>
+</ul>
+<h2>Không có trong chương này</h2>
+<p>Không có tên sàn, không có nút bấm, không có bộ số cài sẵn, không có copy bot / hoa hồng. Phần thao tác trên nền tảng chưa được Bộ Tài chính cấp phép không đưa lên sách public (xem chương phạm vi và pháp lý).</p>
+  </main>
+  <footer class="wrap">
+    <p>Đã lọc theo Nghị quyết 05/2025/NQ-CP. Không phải tư vấn pháp lý.</p>
+  </footer>
+</body>
+</html>
