@@ -1,111 +1,119 @@
-# Cai Nghien Trading Local RAG
+﻿# Cai Nghien Trading Local RAG
 
-Dự án local để thu thập, phân tích và chat dựa trên dữ liệu của kênh YouTube:
-`https://www.youtube.com/@cainghientrading`.
+Dự án local thu thập transcript kênh YouTube
+`https://www.youtube.com/@cainghientrading`
+rồi **viết lại kiến thức thành sách theo chủ đề**.
 
-Mục tiêu: trợ lý trả lời bằng tiếng Việt, có thể dùng phong cách diễn đạt của kênh, nhưng **chỉ dùng kiến thức có bằng chứng trong dữ liệu đã phân tích từ kênh**. Nếu không có bằng chứng đủ rõ, trợ lý trả lời:
+**Cách đọc:** `data/analysis/knowledge/playbook/00-index.md` hoặc site tĩnh `docs/index.html`.
 
-> Tôi không biết dựa trên dữ liệu đã phân tích từ kênh này.
+Sách public **đã lọc theo Nghị quyết 05/2025/NQ-CP**: không hướng dẫn bot / đòn bẩy / sàn nước ngoài / tín hiệu mua bán. Không phải tư vấn pháp lý.
 
-## Nguyên tắc thiết kế
+```powershell
+uv run cnga ask "Quỹ khẩn cấp trước khi đầu tư?"
+uv run cnga ask "Sàn crypto Việt Nam cấp phép thế nào?"
+```
 
-- Mọi dữ liệu do dự án tạo ra nằm trong thư mục dự án: `data/`, `models/`, `logs/`, `.cache/`.
-- Không lưu đường dẫn tuyệt đối vào dữ liệu phân tích; chỉ lưu đường dẫn tương đối theo project root.
-- Tách dữ liệu gốc bất biến (`data/raw`) và dữ liệu phân tích tái tạo được (`data/analysis`).
-- Pipeline chạy lại được, có state/cache, bỏ qua phần đã xử lý thành công.
-- Chatbot luôn truy hồi bằng chứng trước khi trả lời.
-- Lớp `content` là bằng chứng kiến thức; lớp `style` chỉ ảnh hưởng cách diễn đạt, không được dùng làm bằng chứng sự thật.
-- Phiên bản MVP dùng SQLite FTS cục bộ để dễ kiểm chứng. Có thể bật Chroma/BGE-M3 sau, nhưng vẫn phải trỏ toàn bộ model/cache/index vào thư mục dự án.
+## GitHub Pages (public)
+
+Site tĩnh trong `docs/`: mục lục, từng chương, ô hỏi (cùng kiểu `cnga ask`). Không chạy Python/ASR trên Pages.
+
+```powershell
+uv run cnga export-pages
+```
+
+Rồi commit thư mục `docs/`, push, bật Pages:
+
+1. GitHub repo → **Settings** → **Pages**
+2. Source: **Deploy from a branch**
+3. Branch `main`, folder `/docs` → Save
+
+URL dạng `https://<user>.github.io/cai-nghien-trading-local-rag/`
+
+`data/` vẫn gitignore (transcript/model). Chỉ sách trong `docs/` là public.
+
+## Nguyên tắc
+
+- Mọi dữ liệu nằm trong thư mục dự án: `data/`, `models/`, `logs/`, `.cache/`.
+- Không lưu đường dẫn tuyệt đối vào dữ liệu phân tích.
+- Tách dữ liệu gốc (`data/raw`) và dữ liệu phân tích (`data/analysis`).
+- **Deliverable chính:** `data/analysis/knowledge/playbook/` — sách theo chủ đề.
+- Bài từng video: `data/analysis/knowledge/videos/{video_id}/article.md`.
+- Transcript: raw → ai_cleaned → approved (review UI).
 
 ## Cấu trúc
 
 ```text
-config/project.toml              # cấu hình tương đối, portable
-src/cai_nghien_assistant/        # package pipeline
-tests/                           # unit test guardrail
-data/raw/                        # dữ liệu gốc, write-once
-data/analysis/                   # transcript chuẩn hóa, chunk, index, cache
-models/                          # model local GGUF / embedding / OCR
-logs/                            # log chạy pipeline
-.cache/                          # cache thư viện được ép nằm trong project
+config/project.toml
+src/cai_nghien_assistant/
+tests/
+data/raw/
+data/analysis/
+  knowledge/
+    playbook/           # sách đọc / hỏi
+    videos/{id}/source.md
+    videos/{id}/article.md
+models/
+logs/
+.cache/
 ```
 
 ## Cài đặt bằng uv
-
-Chạy từ thư mục project:
 
 ```powershell
 uv sync --extra youtube --extra asr --extra ocr --extra dev
 ```
 
-`uv.toml` ép `uv` dùng cache `.cache/uv` và copy package vào `.venv` để project portable hơn.
-
-Nếu cần tác vụ nặng sau này:
+## Luồng chính
 
 ```powershell
-uv sync --extra youtube --extra ml --extra asr --extra ocr --extra dev
-```
-
-## Luồng MVP
-
-```powershell
-# Tạo cây thư mục local và ép cache thư viện vào project
 uv run cnga init
 uv run cnga doctor
 
-# Thu catalog metadata, sort từ video cũ nhất tới mới nhất
 uv run cnga collect --limit 20 --fetch-sidecars
-
-# Tải media khi cần ASR/OCR local (oldest-first)
 uv run cnga fetch-audio --limit 5 --content-type regular
-uv run cnga fetch-video-light --limit 5 --content-type regular
+uv run cnga asr --limit 5 --content-type regular --model-size large-v3 --device cuda
 
-# Subtitle chất lượng cao hơn: chạy Whisper large-v3 local trên audio
-uv run cnga asr --limit 5 --content-type regular --model-size large-v3 --device cuda --compute-type float16
-
-# Frame/OCR: trích frame thưa rồi chạy PaddleOCR project-local
-uv run cnga extract-frames --limit 5 --content-type regular
-uv run cnga ocr-frames --limit 5 --content-type regular
-
-# Chuẩn hóa subtitle có sẵn từ YouTube/yt-dlp thành transcript có provenance
 uv run cnga normalize-transcripts
+uv run cnga clean-transcripts --limit 10
+uv run cnga review-ui --port 8765
 
-# Build index local từ transcript/OCR/analysis đã có (SQLite FTS MVP)
-uv run cnga build-index
-
-# Optional: build Chroma persistent index trong data/analysis/index/chroma
-uv run cnga build-chroma
-
-# Chat có bằng chứng
-uv run cnga chat "Kênh này giải thích quản trị rủi ro như thế nào?"
+uv run cnga assemble-playbook-source
+uv run cnga ask "Stop loss / ký quỹ bot thì sao?"
 ```
 
-## Chạy full pipeline có log/resume
-
-Runner dưới đây chạy từng video theo thứ tự cũ nhất, ghi log/state trong project
-và tự bỏ qua artifact đã có:
+Video mới sau khi đã duyệt lời:
 
 ```powershell
-uv run python scripts/run_full_pipeline.py --root H:\test --content-type regular --status
-uv run python scripts/run_full_pipeline.py --root H:\test --content-type regular
+uv run cnga compile-playbook
+# Máy local tự viết bài (chất lượng tùy model):
+uv run cnga compile-playbook --endpoint http://127.0.0.1:8080/completion
 ```
 
-File chính:
+`compile-playbook` không xóa chương đã viết; chỉ gắn thêm mục cập nhật.
 
-- State resume: `data/analysis/state/full_pipeline_regular.json`
-- Log mỗi lần chạy: `logs/full-pipeline/*.log`
+## Chạy theo lớp
 
-Nếu bị dừng giữa chừng, chạy lại đúng lệnh trên. Runner sẽ kiểm tra artifact
-`audio`, `video-light`, `asr`, `frames`, `ocr` trước khi chạy stage tiếp theo.
+| Lớp | Lệnh | Việc làm |
+|-----|------|----------|
+| **A** | `scripts/run_layer_a.py` | audio, ASR, frames, OCR |
+| **B** | `scripts/run_layer_b.py` | normalize + conservative-refine |
+| **D** | `scripts/run_layer_d.py` | extract-knowledge (cũ, cắt câu — không dùng để trả lời) |
+| **C** | `scripts/run_layer_c.py` | *(tùy chọn)* build-index FTS |
 
-## Model local
+PowerShell: `.\scripts\run_layer_a.ps1`, `run_layer_b.ps1`, `run_layer_d.ps1`.
 
-Không dùng cloud mặc định.
+## Transcript quality
 
-- Chat: đặt GGUF Qwen3 nhỏ trong `models/chat/`, chạy `llama.cpp` server local, rồi dùng `cnga analyze-local --endpoint http://127.0.0.1:8080/completion`.
-- Vision: đặt Qwen3-VL GGUF trong `models/vision/`; MVP chỉ trích frame/OCR trước, chưa gọi vision tràn lan.
-- Embedding: `cnga build-chroma` dùng hash embedding local không tải model để tránh cache ngoài project. Khi chuyển sang BGE-M3/sentence-transformers, cache phải nằm trong `.cache/huggingface` và model trong `models/embeddings`.
-- Ollama không được bật mặc định. Chỉ dùng nếu `OLLAMA_MODELS` đã trỏ vào `models/ollama` và `cnga doctor` xác nhận không phát sinh file ngoài project.
+Chất lượng sách phụ thuộc transcript đã clean/approve.
+
+## Tùy chọn (không dùng để trả lời)
+
+| Lệnh | Ghi chú |
+|------|---------|
+| `cnga extract-knowledge` | Cắt câu thành fact — giữ để đối chiếu, không phải sách |
+| `cnga build-index` | FTS search local |
+| `cnga chat` | Chat local — deprecated |
+| `cnga analyze-local` | LLM batch extract — tùy model |
 
 ## Kiểm thử
 
@@ -113,15 +121,6 @@ Không dùng cloud mặc định.
 uv run python -m unittest discover -s tests
 ```
 
-Các test chính:
-
-- không ghi đè dữ liệu gốc write-once;
-- cache/env path nằm trong project;
-- build index chạy lại không tạo trùng;
-- chatbot từ chối khi không có content evidence;
-- style evidence không được dùng làm bằng chứng factual;
-- evidence mới hơn được ưu tiên khi điểm truy hồi ngang nhau.
-
 ## Lưu ý pháp lý / vận hành
 
-Pipeline chỉ tải metadata/subtitle mặc định. Audio/video chỉ nên tải khi hợp pháp, cần thiết cho ASR/OCR, và vẫn lưu trong `data/raw` với hash/provenance. Không push dữ liệu, model, cache hoặc log.
+Pipeline chỉ tải metadata/subtitle mặc định. Audio/video chỉ khi hợp pháp và cần ASR/OCR. Không push dữ liệu, model, cache hoặc log.

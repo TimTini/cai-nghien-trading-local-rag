@@ -1,0 +1,86 @@
+{
+  "unknown_answer": "Tôi không biết dựa trên dữ liệu đã phân tích từ kênh này.",
+  "chapters": [
+    {
+      "topic_id": "pham_vi",
+      "title": "Phạm vi sách (lọc theo pháp luật Việt Nam)",
+      "file": "pham-vi.md",
+      "keywords": [
+        "phạm vi",
+        "gỡ",
+        "nghị quyết 05",
+        "không hướng dẫn",
+        "quảng cáo"
+      ],
+      "href": "chapters/pham-vi.html",
+      "html": "<h1>Phạm vi sách (lọc theo pháp luật Việt Nam)</h1>\n<p>Sách public chỉ giữ kiến thức <strong>không hướng dẫn giao dịch / không quảng cáo sàn chưa được cấp phép</strong>.</p>\n<p>Đây không phải tư vấn pháp lý. Người đọc tự đối chiếu văn bản gốc trên cổng thông tin Chính phủ / Bộ Tài chính.</p>\n<h2>Vì sao gỡ một số chương</h2>\n<p>Theo <strong>Nghị quyết số 05/2025/NQ-CP</strong> (09/9/2025) về thí điểm thị trường tài sản mã hóa:</p>\n<ul>\n<li>Chỉ tổ chức được <strong>Bộ Tài chính cấp giấy phép</strong> mới được cung cấp dịch vụ liên quan đến tài sản mã hóa <strong>và quảng cáo, tiếp thị</strong> liên quan đến tài sản mã hóa.</li>\n<li>Công an các địa phương đã cảnh báo: lợi dụng Nghị quyết 05 để mời gọi đầu tư qua sàn không rõ nguồn, tự xưng “đã cấp phép”. <strong>Chưa có sàn nào được công bố cấp phép chính thức</strong> cho đến khi Bộ Tài chính / cơ quan có thẩm quyền công bố danh sách.</li>\n<li>Sau <strong>6 tháng</strong> kể từ khi tổ chức cung cấp dịch vụ đầu tiên được cấp phép, nhà đầu tư trong nước giao dịch tài sản mã hóa <strong>không qua</strong> tổ chức được cấp phép có thể bị xử lý hành chính hoặc hình sự (theo Nghị quyết).</li>\n</ul>\n<p>Do đó sách <strong>không còn</strong> hướng dẫn:</p>\n<ul>\n<li>Cài bot, đòn bẩy, chốt lời / dừng lỗ trên sàn nước ngoài (OKX, BingX, …)</li>\n<li>Sự kiện điểm, copy bot, hoa hồng, TRADEFI dầu/vàng trên sàn chưa cấp phép tại Việt Nam</li>\n<li>Lọc coin / tín hiệu vào lệnh / “tiếp tục DCA” / vùng giá mua cụ thể</li>\n</ul>\n<h2>Còn lại</h2>\n<ul>\n<li>Tiền bạc cá nhân (chi tiêu, quỹ khẩn cấp)</li>\n<li>Rủi ro chung: không dùng tiền sinh hoạt để đánh bạc tài chính</li>\n<li>Tâm lý: đừng quyết định lúc hoảng, đừng tin “chắc lãi”</li>\n<li>Pháp lý: đọc Nghị quyết 05, chỉ tin danh sách cấp phép chính thức</li>\n</ul>"
+    },
+    {
+      "topic_id": "phap_ly",
+      "title": "Pháp lý tài sản mã hóa tại Việt Nam",
+      "file": "phap-ly-viet-nam.md",
+      "keywords": [
+        "pháp lý",
+        "nghị quyết",
+        "05",
+        "cấp phép",
+        "bộ tài chính",
+        "sàn",
+        "thí điểm",
+        "6 tháng",
+        "scam",
+        "quảng cáo",
+        "tài sản mã hóa"
+      ],
+      "href": "chapters/phap-ly-viet-nam.html",
+      "html": "<h1>Pháp lý tài sản mã hóa tại Việt Nam</h1>\n<p>Nguồn đối chiếu: <strong>Nghị quyết số 05/2025/NQ-CP ngày 09/9/2025</strong> của Chính phủ (thí điểm 5 năm, hiệu lực từ ngày ký). Không dùng tin hội nhóm / video tự xưng “đã hợp pháp”.</p>\n<p>Nội dung dưới đây là tóm tắt giáo dục. Không thay thế văn bản gốc.</p>\n<h2>Ai được cung cấp dịch vụ và quảng cáo</h2>\n<p>Chỉ tổ chức được Bộ Tài chính cấp <strong>Giấy phép cung cấp dịch vụ tổ chức thị trường giao dịch tài sản mã hóa</strong> mới được:</p>\n<ul>\n<li>cung cấp dịch vụ liên quan đến tài sản mã hóa, và</li>\n<li><strong>quảng cáo, tiếp thị</strong> liên quan đến tài sản mã hóa.</li>\n</ul>\n<p>Tổ chức / cá nhân không có giấy phép đó thì không được làm các việc trên.</p>\n<h2>Giao dịch phải qua tổ chức được cấp phép</h2>\n<p>Các giao dịch tài sản mã hóa thuộc phạm vi Nghị quyết phải thực hiện thông qua tổ chức cung cấp dịch vụ do Bộ Tài chính cấp phép. Giao dịch dùng <strong>đồng Việt Nam</strong> theo thiết kế thí điểm.</p>\n<p>Nhà đầu tư trong nước được mở tài khoản tại tổ chức được cấp phép để lưu ký, mua, bán tại Việt Nam — <strong>khi</strong> tổ chức đó đã có giấy phép.</p>\n<h2>Mốc 6 tháng sau giấy phép đầu tiên</h2>\n<p>Sau thời hạn <strong>6 tháng</strong> kể từ khi tổ chức cung cấp dịch vụ tài sản mã hóa <strong>đầu tiên</strong> được cấp phép, nhà đầu tư trong nước giao dịch <strong>không thông qua</strong> tổ chức được Bộ Tài chính cấp phép, tùy tính chất và mức độ, có thể bị xử lý vi phạm hành chính hoặc truy cứu trách nhiệm hình sự theo pháp luật.</p>\n<p>Trước mốc đó, không có nghĩa “sàn nước ngoài được khuyến khích”. Chủ trương là đưa giao dịch vào hệ thống được cấp phép.</p>\n<h2>Chưa có giấy phép thì chưa có sàn “hợp pháp” để giao dịch thí điểm</h2>\n<p>Cơ quan công an đã cảnh báo: nhiều đối tượng bịa chuyện “đã cấp phép”, “đã hợp pháp hóa” để lừa đảo.</p>\n<p>Cho đến khi Bộ Tài chính / Ủy ban Chứng khoán Nhà nước <strong>công bố danh sách</strong> tổ chức được cấp phép, không coi bất kỳ sàn, group, hay trang web nào là sàn thí điểm hợp pháp chỉ vì họ tự xưng.</p>\n<h2>Việc nên làm (và không làm)</h2>\n<p>1. Chỉ tin danh sách cấp phép trên kênh <strong>chính thức</strong> của Bộ Tài chính / Ủy ban Chứng khoán Nhà nước. Không tin tin đồn, livestream, tin nhắn. 2. <strong>Không chuyển tiền</strong> vào sàn / app tự nhận đã được cấp phép khi chưa có xác nhận trên kênh chính thức. Lừa đảo bám tin Nghị quyết 05 là dạng đã được cảnh báo. 3. Không tham gia mời gọi đầu tư “tiền mã hóa chắc lãi”, “bot thu nhập thụ động”, copy lệnh từ người lạ. 4. Không hướng dẫn hay quảng cáo giao dịch trên nền tảng chưa được cấp phép tại Việt Nam.</p>\n<h2>Video cũ của kênh</h2>\n<p>Video năm 2026 có thể nói về sàn nước ngoài, bot, sự kiện điểm. Phần đó <strong>không đưa vào sách public</strong> vì không phù hợp khung quảng cáo / cung cấp dịch vụ trong Nghị quyết 05.</p>"
+    },
+    {
+      "topic_id": "tien_bac",
+      "title": "Tiền bạc cá nhân (lương Việt)",
+      "file": "tien-bac-ca-nhan.md",
+      "keywords": [
+        "50/30/20",
+        "lương",
+        "tiết kiệm",
+        "quỹ khẩn cấp",
+        "phân bổ",
+        "10 triệu",
+        "chi tiêu"
+      ],
+      "href": "chapters/tien-bac-ca-nhan.html",
+      "html": "<h1>Tiền bạc cá nhân (lương Việt)</h1>\n<p>Nguồn ý: video <code>a2GcLzOfqP8</code> (2026-05-02), chỉ giữ phần chi tiêu / quỹ dự phòng. Không hướng dẫn mua bán tài sản mã hóa.</p>\n<h2>50/30/20 kiểu Mỹ gãy với lương 10 triệu</h2>\n<p>50% nhu cầu / 30% mong muốn / 20% tiết kiệm: với lương 10 triệu thì 50% chỉ còn 5 triệu cho thuê nhà, ăn, điện nước, đi lại. Thuê nhà Hà Nội/Sài Gòn đã 3–5 triệu; chi phí sinh hoạt một người đi làm có thể khoảng 11–15 triệu/tháng. Công thức gãy ngay bước đầu. Nó thiết kế cho lương Mỹ, không phải lương Việt 10 triệu.</p>\n<h2>Quỹ khẩn cấp trước — không ngoại lệ</h2>\n<p>Phải có quỹ chi tiêu đột xuất (ốm, mất việc, sửa nhà) <strong>trước</strong> khi nghĩ tới bất kỳ hình thức “đầu tư” nào. Không dùng tiền thuê nhà / ăn uống để đánh cược.</p>\n<h2>Không coi công cụ tài chính rủi ro là lối thoát nghèo</h2>\n<p>Lời video: đừng coi kênh rủi ro cao là phương án thoát nghèo nhanh. Đừng chuyển tiền vào app / “sàn” lạ, tự xưng hợp pháp.</p>\n<h2>Lạm phát và lãi tiết kiệm (tham khảo lúc quay)</h2>\n<p>Lời tóm tắt cuối video: lạm phát khoảng 4% và lãi suất khoảng 6% — gửi không kỳ hạn / không có kế hoạch thì sức mua vẫn bị bào. Đây là nhận xét giáo dục về chi tiêu, không phải lời khuyên gửi ngân hàng hay mua tài sản nào.</p>"
+    },
+    {
+      "topic_id": "quan_ly_von",
+      "title": "Rủi ro tiền bạc",
+      "file": "quan-ly-von.md",
+      "keywords": [
+        "rủi ro",
+        "vốn",
+        "mất tiền",
+        "đòn bẩy",
+        "quỹ khẩn cấp",
+        "sinh hoạt",
+        "all-in"
+      ],
+      "href": "chapters/quan-ly-von.html",
+      "html": "<h1>Rủi ro tiền bạc (không hướng dẫn lệnh)</h1>\n<p>Chỉ giữ nguyên tắc bảo vệ tiền sinh hoạt. Không hướng dẫn bot, đòn bẩy, hay sàn cụ thể.</p>\n<h2>Chỉ dùng số tiền chấp nhận mất hết</h2>\n<p>Tiền thuê nhà, ăn uống, học phí, quỹ khẩn cấp: không bỏ vào việc có thể mất toàn bộ trong thời gian ngắn.</p>\n<p>Nếu một hoạt động ghi “có thể mất hết số đã bỏ vào”, hãy hiểu đúng nghĩa đen: mất hết là kịch bản thật, không phải câu cửa miệng.</p>\n<h2>Đòn bẩy không phải cách “tăng lương”</h2>\n<p>Công cụ nhân số lần (vay, đòn bẩy, ký quỹ) có thể làm số lỗ lớn hơn số tiền mình tưởng. Không có mức nhân nào “không cháy”. Không dùng đòn bẩy để bù thu nhập.</p>\n<h2>Không phó mặc máy / người lạ</h2>\n<p>Phần mềm, bot, “chuyên gia” copy lệnh không bảo đảm lãi. Nhận định sai vẫn mất tiền. Không nộp tiền rồi giao quyền kiểm soát cho người không rõ danh tính.</p>\n<h2>Muốn giữ tiền thì đừng để mất tiền</h2>\n<p>Ưu tiên không mất vốn sinh hoạt, không all-in, không tin “x100”. Kiến thức và kỷ luật chi tiêu đứng trước mọi công cụ.</p>\n<h2>Không phải lời khuyên đầu tư</h2>\n<p>Nội dung giáo dục. Mọi quyết định tài chính là trách nhiệm người đọc. Đối chiếu pháp luật Việt Nam (xem chương pháp lý).</p>"
+    },
+    {
+      "topic_id": "tam_ly",
+      "title": "Tâm lý tiền bạc",
+      "file": "tam-ly.md",
+      "keywords": [
+        "tâm lý",
+        "hoảng",
+        "sợ hãi",
+        "chắc lãi",
+        "kỷ luật",
+        "dyor"
+      ],
+      "href": "chapters/tam-ly.html",
+      "html": "<h1>Tâm lý tiền bạc</h1>\n<p>Không hướng dẫn vào lệnh, không kêu gọi “mua lúc giảm”.</p>\n<h2>Đừng quyết định lúc hoảng</h2>\n<p>Khi tài sản (nhà, vàng, sổ tiết kiệm, hay thứ khác) biến động, đừng bán / chuyển tiền trong trạng thái sợ hãi trước khi hiểu chuyện gì đang xảy ra và tiền đó có phải tiền sinh hoạt không.</p>\n<h2>Đừng tin “chắc lãi” / “máy chạy là có tiền”</h2>\n<p>Lời hứa thu nhập thụ động, bot 24/7, copy người khác: không biến rủi ro thành chắc lãi. Thời gian rảnh không phải lãi.</p>\n<h2>Đừng đu đáy / đu đỉnh vì sĩ diện</h2>\n<p>Bắt đúng một lần dễ khiến lần sau cố bắt tiếp rồi mất nhiều hơn. Không có nghĩa là phải “vào lệnh”. Nghĩa là đừng để cái tôi quyết định túi tiền.</p>\n<h2>Giáo dục không phải lệnh mua bán</h2>\n<p>Mọi quyết định tài chính là trách nhiệm người đọc. DYOR nghĩa là tự đọc luật và nguồn chính thức, không phải tự tìm sàn chưa cấp phép.</p>"
+    }
+  ]
+}

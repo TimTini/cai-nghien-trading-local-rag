@@ -1,0 +1,75 @@
+{
+  "chapters": [
+    {
+      "topic_id": "pham_vi",
+      "title": "Phạm vi sách (lọc theo pháp luật Việt Nam)",
+      "file": "pham-vi.md",
+      "keywords": [
+        "phạm vi",
+        "gỡ",
+        "nghị quyết 05",
+        "không hướng dẫn",
+        "quảng cáo"
+      ]
+    },
+    {
+      "topic_id": "phap_ly",
+      "title": "Pháp lý tài sản mã hóa tại Việt Nam",
+      "file": "phap-ly-viet-nam.md",
+      "keywords": [
+        "pháp lý",
+        "nghị quyết",
+        "05",
+        "cấp phép",
+        "bộ tài chính",
+        "sàn",
+        "thí điểm",
+        "6 tháng",
+        "scam",
+        "quảng cáo",
+        "tài sản mã hóa"
+      ]
+    },
+    {
+      "topic_id": "tien_bac",
+      "title": "Tiền bạc cá nhân (lương Việt)",
+      "file": "tien-bac-ca-nhan.md",
+      "keywords": [
+        "50/30/20",
+        "lương",
+        "tiết kiệm",
+        "quỹ khẩn cấp",
+        "phân bổ",
+        "10 triệu",
+        "chi tiêu"
+      ]
+    },
+    {
+      "topic_id": "quan_ly_von",
+      "title": "Rủi ro tiền bạc",
+      "file": "quan-ly-von.md",
+      "keywords": [
+        "rủi ro",
+        "vốn",
+        "mất tiền",
+        "đòn bẩy",
+        "quỹ khẩn cấp",
+        "sinh hoạt",
+        "all-in"
+      ]
+    },
+    {
+      "topic_id": "tam_ly",
+      "title": "Tâm lý tiền bạc",
+      "file": "tam-ly.md",
+      "keywords": [
+        "tâm lý",
+        "hoảng",
+        "sợ hãi",
+        "chắc lãi",
+        "kỷ luật",
+        "dyor"
+      ]
+    }
+  ]
+}
