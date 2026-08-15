@@ -28,6 +28,12 @@ Dùng một chỉ số rồi lao vào là cách mất tiền đã được kể 
 - Còn lịch mở khóa token: team có thể vẫn đang hoạt động. Unlock hết không tự thành xấu hay tốt — nhưng “hết unlock rồi im” là rủi ro đã được nhắc.
 - Không có người mua bán, giá nằm im: mua vào khó bán ra. Đây là rủi ro thanh khoản, không phải mẹo vào lệnh.
 
+## Đường trung bình khi không có người mua bán
+
+Công cụ vẽ giá (đường trung bình và tương tự) trên đồng **không có khối lượng** chỉ là hình trang trí. Số liệu đẹp mà không ai mua-bán thì không thành quyết định.
+
+Không có bộ số đường nào “đúng là tín hiệu”.
+
 ## Không có trong chương này
 
 Không có bộ lọc “vào lệnh khi OI/mcap trên X”. Không có danh sách sàn hay app để soi số. Không có tín hiệu FOMO theo nến.

@@ -55,7 +55,9 @@
         "đòn bẩy",
         "quỹ khẩn cấp",
         "sinh hoạt",
-        "all-in"
+        "all-in",
+        "tách túi",
+        "tach tui"
       ]
     },
     {
@@ -81,7 +83,9 @@
         "grid",
         "dca",
         "máy",
-        "tự động"
+        "tự động",
+        "trung lập",
+        "cô lập"
       ]
     },
     {
@@ -97,6 +101,20 @@
         "long",
         "short",
         "thanh khoản"
+      ]
+    },
+    {
+      "topic_id": "nhan_dinh_2026",
+      "title": "Nhận định lúc quay (quý 1/2026)",
+      "file": "nhan-dinh-2026.md",
+      "keywords": [
+        "nhận định",
+        "2026",
+        "quý 1",
+        "etf",
+        "fear",
+        "greed",
+        "bitcoin quý"
       ]
     }
   ]

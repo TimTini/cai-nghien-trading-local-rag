@@ -18,12 +18,15 @@ Do đó sách **không** đưa hướng dẫn thao tác trên sàn cụ thể:
 - Sự kiện điểm, copy bot, hoa hồng, đánh dầu/vàng trên sàn chưa cấp phép
 - Bộ lọc “vào lệnh khi …”, vùng giá mua, “tiếp tục DCA”
 
-**Khái niệm** bot lưới / DCA và **Open Interest** vẫn giữ: đó là kiến thức cơ chế và số liệu, không phải quảng cáo dịch vụ.
+**Khái niệm** bot lưới / DCA, **Open Interest**, và bản tin **đã hết hạn** (quý 1/2026, không kèm vùng mua) vẫn giữ. Đó là kiến thức cơ chế / số liệu / bối cảnh lúc quay — không phải quảng cáo dịch vụ.
+
+Đã gỡ cả chương how-to rồi trả lại phần kiến thức: lọc lần đầu gỡ luôn cơ chế. Lần này giữ cơ chế; vẫn không đưa nút bấm / bộ số / tên sàn.
 
 ## Còn lại
 
 - Tiền bạc cá nhân (chi tiêu, quỹ khẩn cấp)
-- Rủi ro chung: không dùng tiền sinh hoạt để đánh bạc tài chính
+- Rủi ro chung: không dùng tiền sinh hoạt để đánh bạc tài chính; tách túi thì mất đúng túi
 - Tâm lý: đừng quyết định lúc hoảng, đừng tin “chắc lãi”
 - Pháp lý: đọc Nghị quyết 05, chỉ tin danh sách cấp phép chính thức
-- Bot (khái niệm lưới / DCA) và OI (số liệu, không phải lệnh)
+- Bot (cơ chế lưới / DCA, đọc số, tách túi) và OI (số liệu, không phải lệnh)
+- Nhận định quý 1/2026: ảnh chụp lời video, không phải lệnh sống
