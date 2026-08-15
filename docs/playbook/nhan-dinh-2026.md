@@ -17,5 +17,3 @@ Lời video lúc đó:
 Lịch sử được nhắc: tháng 4 Bitcoin tăng 10/15 năm (2011–2025), trung bình khoảng +20,9%. Sau quý 1 đỏ (2018, 2020) tháng 4 hay phục hồi. **Lịch sử không đảm bảo tương lai.**
 
 Video bảo theo dõi quý 2: Fed có cắt lãi không, ETF có tiền vào không, Trung Đông có hạ nhiệt không. Đó là câu hỏi lúc quay, không phải tín hiệu.
-
-Số liệu trên là lời video ngày 08/4/2026. Không cập nhật số sống.

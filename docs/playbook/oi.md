@@ -21,7 +21,7 @@ Cũng không đủ một mình. OI cao mà không có người mua-bán thật (
 
 Tỷ lệ số tài khoản long so với short chỉ nói đám đông đang nghiêng phía nào. Short đông không phải tín hiệu vào long. Long đông không phải tín hiệu short.
 
-Dùng một chỉ số rồi lao vào là cách mất tiền đã được kể trong bài giảng gốc. Số liệu để **quan sát**, không để thay quyết định.
+Dùng một chỉ số rồi lao vào là cách mất tiền.
 
 ## Unlock / thanh khoản (đi kèm khi đọc coin)
 
