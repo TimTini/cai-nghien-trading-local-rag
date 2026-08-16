@@ -19,3 +19,11 @@ logs/
 *.sqlite
 *.sqlite3
 *.db
+
+# Local Cursor copies / rule backups. Canonical rules live outside this repo.
+.cursor/
+backup/
+
+# Per-video agent-direct queues (generated, replay via build_*_edits.py).
+scripts/*_edits.json
+scripts/queue_status.txt
