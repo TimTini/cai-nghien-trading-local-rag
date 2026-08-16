@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from .config import load_project_config
+from .local_llm import LlamaCppClient
 from .retrieval import SearchIndex, format_timestamp, query_terms
 from .schema import Evidence
 
@@ -176,17 +177,64 @@ def has_enough_content_relevance(question: str, evidence: list[Evidence]) -> boo
     return strongest_single_evidence >= required_hits and len(covered_terms) >= required_hits
 
 
-def answer_question(root: str | Path | None, question: str, limit: int | None = None) -> str:
+def retrieve_evidence(
+    root: str | Path | None,
+    question: str,
+    *,
+    content_limit: int | None = None,
+    style_limit: int | None = None,
+) -> tuple[list[Evidence], list[Evidence]]:
     config = load_project_config(root)
     index = SearchIndex.from_project(root)
     try:
-        content_limit = limit or int(config["retrieval"]["default_limit"])
-        evidence = index.search(question, kind="content", limit=content_limit)
-        relevant_evidence = filter_relevant_evidence(question, evidence)
-        if len(relevant_evidence) < int(config["retrieval"]["min_content_evidence"]) or not has_enough_content_relevance(
-            question, evidence
-        ):
-            return config["guardrails"]["unknown_answer"]
-        return build_extractive_answer(question, relevant_evidence)
+        climit = content_limit or int(config["retrieval"]["default_limit"])
+        slimit = style_limit or int(config.get("chat", {}).get("style_evidence_limit") or 3)
+        content = index.search(question, kind="content", limit=climit)
+        style = index.search(question, kind="style", limit=slimit)
+        return content, style
     finally:
         index.close()
+
+
+def llama_endpoint_from_config(config: dict) -> str:
+    return str(config.get("chat", {}).get("llama_endpoint") or "").strip()
+
+
+def try_llama_answer(prompt: str, endpoint: str, config: dict) -> str | None:
+    if not endpoint:
+        return None
+    try:
+        client = LlamaCppClient(endpoint=endpoint)
+        return client.complete(
+            prompt,
+            max_tokens=int(config.get("chat", {}).get("max_tokens") or 900),
+            temperature=float(config.get("chat", {}).get("temperature") or 0.15),
+        ).strip()
+    except Exception:
+        return None
+
+
+def answer_question(
+    root: str | Path | None,
+    question: str,
+    limit: int | None = None,
+    *,
+    endpoint: str | None = None,
+    use_llm: bool = False,
+) -> str:
+    config = load_project_config(root)
+    content, style = retrieve_evidence(root, question, content_limit=limit)
+    relevant = filter_relevant_evidence(question, content)
+    if len(relevant) < int(config["retrieval"]["min_content_evidence"]) or not has_enough_content_relevance(
+        question, content
+    ):
+        return str(config["guardrails"]["unknown_answer"])
+
+    llm_url = (endpoint or "").strip() or llama_endpoint_from_config(config)
+    if use_llm and llm_url:
+        prompt = build_grounded_prompt(question, relevant, style)
+        llm_text = try_llama_answer(prompt, llm_url, config)
+        if llm_text:
+            return llm_text
+
+    return build_extractive_answer(question, relevant)

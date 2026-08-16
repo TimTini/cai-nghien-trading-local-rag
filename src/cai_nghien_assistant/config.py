@@ -47,6 +47,9 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "allow_cloud": False,
         "allow_style_as_fact": False,
     },
+    "playbook": {
+        "output_dir": "data/analysis/knowledge",
+    },
 }
 
 

@@ -160,6 +160,44 @@ def sort_oldest_first(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(entries, key=lambda item: (item.get("published_at") or "9999-99-99", item["video_id"]))
 
 
+def filter_catalog_entries(
+    entries: list[dict[str, Any]],
+    *,
+    content_types: tuple[str, ...] | None = None,
+    published_year: int | None = None,
+    video_ids: set[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Filter catalog rows; preserves caller order unless entries unsorted."""
+
+    result = list(entries)
+    if content_types:
+        allowed = set(content_types)
+        result = [entry for entry in result if entry.get("content_type") in allowed]
+    if published_year is not None:
+        prefix = f"{published_year}-"
+        result = [entry for entry in result if str(entry.get("published_at") or "").startswith(prefix)]
+    if video_ids is not None:
+        result = [entry for entry in result if entry.get("video_id") in video_ids]
+    return result
+
+
+def catalog_entries_filtered(
+    root: str | Path | None,
+    *,
+    content_type: str | None = None,
+    published_year: int | None = None,
+) -> list[dict[str, Any]]:
+    """Load latest catalog with optional content_type and year filters."""
+
+    entries = load_latest_catalog(root)
+    content_types: tuple[str, ...] | None = None
+    if content_type == "regular+livestream":
+        content_types = ("regular", "livestream")
+    elif content_type and content_type != "all":
+        content_types = (content_type,)
+    return filter_catalog_entries(entries, content_types=content_types, published_year=published_year)
+
+
 def load_latest_catalog(root: str | Path | None = None) -> list[dict[str, Any]]:
     root_path = Path(root or ".").resolve()
     config = load_project_config(root_path)

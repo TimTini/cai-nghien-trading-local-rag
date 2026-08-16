@@ -35,6 +35,70 @@ video_light_format = "bv*[height<=720][ext=mp4]/bv*[height<=720]/bv*[height<=480
 frame_scene_threshold = 0.25
 frame_max_per_video = 80
 
+[transcript_quality]
+cleaner_logic_version = "2.0.0"
+default_model_id = "conservative-refine"
+default_engine = "conservative-refine"
+asr_confusion_map = "data/analysis/transcript_quality/asr_confusion_map.json"
+review_ui_host = "127.0.0.1"
+review_ui_port = 8765
+pause_file = "data/analysis/state/transcript_clean.pause"
+
+[transcript_quality.asr_reprocess]
+model_size = "large-v3"
+device = "cuda"
+compute_type = "float16"
+beam_size = 8
+
+[pipeline.full_run]
+# Mặc định cho scripts/run_layer_a.py và run_full_pipeline.py
+content_type = "regular+livestream"
+model_size = "large-v3"
+device = "cuda"
+compute_type = "float16"
+beam_size = 8
+index_every = 10
+
+[pipeline.layer_b]
+# Mặc định cho scripts/run_layer_b.py (None = mọi video có transcript)
+content_type = ""
+skip_asr_reprocess = true
+asr_reprocess_limit = 20
+
+[pipeline.layer_c]
+# build-index: optional search index (không cần cho trích xuất kiến thức)
+
+[pipeline.layer_d]
+# Mặc định cho scripts/run_layer_d.py — trích xuất fact từ transcript + OCR
+content_type = ""
+
+[pipeline.reprocess]
+year = 2026
+content_type = "regular+livestream"
+reset_review = true
+skip_index = true
+enable_asr_reprocess = true
+model_size = "large-v3"
+device = "cuda"
+compute_type = "float16"
+beam_size = 8
+review_mode = "agent_session"
+
+[knowledge_extraction]
+output_dir = "data/analysis/knowledge"
+min_sentence_chars = 20
+require_domain_term = true
+include_ocr = true
+
+[playbook]
+output_dir = "data/analysis/knowledge"
+
+[chat]
+llama_endpoint = "http://127.0.0.1:8080/completion"
+max_tokens = 900
+temperature = 0.15
+style_evidence_limit = 3
+
 [guardrails]
 unknown_answer = "Tôi không biết dựa trên dữ liệu đã phân tích từ kênh này."
 allow_cloud = false

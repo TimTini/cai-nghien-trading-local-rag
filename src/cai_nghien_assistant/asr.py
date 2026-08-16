@@ -112,9 +112,18 @@ def asr_batch(
     beam_size: int = 5,
     vad_filter: bool = False,
     force: bool = False,
+    published_year: int | None = None,
+    video_id: str | None = None,
 ) -> dict[str, int]:
     root_path = Path(root or ".").resolve()
-    entries = select_catalog_entries(root_path, limit=limit, content_type=content_type, offset=offset)
+    entries = select_catalog_entries(
+        root_path,
+        limit=limit,
+        content_type=content_type,
+        offset=offset,
+        published_year=published_year,
+        video_id=video_id,
+    )
     result: dict[str, int] = {}
     for index, entry in enumerate(entries, start=1):
         video_id = entry["video_id"]

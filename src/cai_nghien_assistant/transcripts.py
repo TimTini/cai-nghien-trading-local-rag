@@ -16,6 +16,7 @@ from .config import load_project_config
 from .paths import configure_local_environment, to_project_relative
 from .schema import TranscriptSegment
 from .storage import atomic_write_json, write_jsonl
+from .youtube_collect import catalog_entries_filtered
 
 
 TIMESTAMP_RE = re.compile(
@@ -201,6 +202,7 @@ def normalize_all_transcripts(
     root: str | Path | None = None,
     limit: int | None = None,
     content_type: str | None = None,
+    published_year: int | None = None,
 ) -> dict[str, int]:
     root_path = Path(root or ".").resolve()
     configure_local_environment(root_path)
@@ -210,18 +212,17 @@ def normalize_all_transcripts(
     if not videos_dir.exists():
         return result
     available = {path.name for path in videos_dir.iterdir() if path.is_dir() and has_sidecar_payload(path)}
-    catalog_path = root_path / config["storage"]["analysis_dir"] / "state" / "latest_catalog.jsonl"
-    catalog_rows = []
-    if catalog_path.exists():
-        catalog_rows = [json.loads(line) for line in catalog_path.read_text(encoding="utf-8").splitlines() if line.strip()]
-        catalog_rows.sort(key=lambda item: (item.get("published_at") or "9999-99-99", item.get("video_id") or ""))
-    if content_type:
-        catalog_rows = [row for row in catalog_rows if row.get("content_type") == content_type]
+    catalog_rows = catalog_entries_filtered(root_path, content_type=content_type, published_year=published_year)
     ordered = [row["video_id"] for row in catalog_rows if row.get("video_id") in available]
     ordered.extend(sorted(available - set(ordered)))
     if limit:
         ordered = ordered[:limit]
     for video_id in ordered:
+        if published_year is not None:
+            year_prefix = f"{published_year}-"
+            row = next((r for r in catalog_rows if r.get("video_id") == video_id), None)
+            if row and not str(row.get("published_at") or "").startswith(year_prefix):
+                continue
         result[video_id] = normalize_video_transcript(root_path, video_id)
     return result
 

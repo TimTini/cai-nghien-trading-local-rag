@@ -8,11 +8,10 @@ filename = "Qwen3-4B-Instruct-2507-Q4_K_M.gguf"
 relative_dir = "models/chat/qwen3-4b-instruct-2507-gguf"
 
 [runtime]
-# CPU by default. Set n_gpu_layers to -1 or a positive number later if llama.cpp
-# is installed with CUDA/Metal support.
+# RTX 4070: -1 = offload all layers to GPU (Qwen3-4B Q4 ~ few GB VRAM).
 n_ctx = 8192
 n_threads = 0
-n_gpu_layers = 0
+n_gpu_layers = -1
 temperature = 0.3
 top_p = 0.8
 top_k = 20

@@ -9,7 +9,34 @@ from typing import Any
 from .config import load_project_config
 from .paths import configure_local_environment, to_project_relative
 from .storage import atomic_write_json, sha256_file
-from .youtube_collect import load_latest_catalog
+from .youtube_collect import catalog_entries_filtered, load_latest_catalog
+
+
+def _catalog_entry(root: Path, video_id: str) -> dict[str, Any] | None:
+    for entry in load_latest_catalog(root):
+        if entry.get("video_id") == video_id:
+            return entry
+    return None
+
+
+def select_catalog_entries(
+    root: str | Path | None = None,
+    limit: int | None = None,
+    content_type: str | None = None,
+    offset: int = 0,
+    published_year: int | None = None,
+    video_id: str | None = None,
+) -> list[dict[str, Any]]:
+    root_path = Path(root or ".").resolve()
+    if video_id:
+        entry = _catalog_entry(root_path, video_id)
+        return [entry] if entry else []
+    entries = catalog_entries_filtered(root_path, content_type=content_type, published_year=published_year)
+    if content_type and content_type not in {"regular+livestream", "all"}:
+        entries = [entry for entry in entries if entry.get("content_type") == content_type]
+    if offset:
+        entries = entries[offset:]
+    return entries[:limit] if limit else entries
 
 
 def _import_ytdlp():
@@ -18,20 +45,6 @@ def _import_ytdlp():
     except ModuleNotFoundError as exc:  # pragma: no cover - optional dependency
         raise RuntimeError("Missing yt-dlp. Install with: uv sync --extra youtube") from exc
     return yt_dlp
-
-
-def select_catalog_entries(
-    root: str | Path | None = None,
-    limit: int | None = None,
-    content_type: str | None = None,
-    offset: int = 0,
-) -> list[dict[str, Any]]:
-    entries = load_latest_catalog(root)
-    if content_type:
-        entries = [entry for entry in entries if entry.get("content_type") == content_type]
-    if offset:
-        entries = entries[offset:]
-    return entries[:limit] if limit else entries
 
 
 def _manifest_valid(manifest_path: Path, root: Path) -> bool:
@@ -156,10 +169,19 @@ def fetch_audio_batch(
     content_type: str | None = None,
     offset: int = 0,
     force: bool = False,
+    published_year: int | None = None,
+    video_id: str | None = None,
 ) -> list[dict[str, Any]]:
     root_path = Path(root or ".").resolve()
     config = load_project_config(root_path)
-    entries = select_catalog_entries(root_path, limit=limit, content_type=content_type, offset=offset)
+    entries = select_catalog_entries(
+        root_path,
+        limit=limit,
+        content_type=content_type,
+        offset=offset,
+        published_year=published_year,
+        video_id=video_id,
+    )
     manifests = []
     for index, entry in enumerate(entries, start=1):
         print(f"[audio] {index}/{len(entries)} {entry.get('published_at') or 'unknown'} {entry['video_id']} {entry.get('title', '')}")
@@ -173,10 +195,19 @@ def fetch_video_light_batch(
     content_type: str | None = None,
     offset: int = 0,
     force: bool = False,
+    published_year: int | None = None,
+    video_id: str | None = None,
 ) -> list[dict[str, Any]]:
     root_path = Path(root or ".").resolve()
     config = load_project_config(root_path)
-    entries = select_catalog_entries(root_path, limit=limit, content_type=content_type, offset=offset)
+    entries = select_catalog_entries(
+        root_path,
+        limit=limit,
+        content_type=content_type,
+        offset=offset,
+        published_year=published_year,
+        video_id=video_id,
+    )
     manifests = []
     for index, entry in enumerate(entries, start=1):
         print(f"[video-light] {index}/{len(entries)} {entry.get('published_at') or 'unknown'} {entry['video_id']} {entry.get('title', '')}")

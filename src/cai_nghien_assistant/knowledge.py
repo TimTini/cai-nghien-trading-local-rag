@@ -10,6 +10,7 @@ from .config import load_project_config
 from .paths import configure_local_environment, to_project_relative
 from .schema import KnowledgeChunk, TranscriptSegment
 from .storage import sha256_text, write_jsonl
+from .transcript_quality.iter_segments import iter_quality_segments
 from .transcripts import iter_normalized_segments
 from .youtube_collect import load_latest_catalog
 
@@ -182,12 +183,26 @@ def iter_ocr_chunks(root: str | Path | None = None) -> Iterable[KnowledgeChunk]:
             )
 
 
+def iter_segments_for_index(root: str | Path | None = None) -> Iterable[TranscriptSegment]:
+    """Ưu tiên transcript quality (approved / AI provisional), còn lại dùng normalize cũ."""
+
+    root_path = Path(root or ".").resolve()
+    quality_video_ids: set[str] = set()
+    quality_segments = list(iter_quality_segments(root_path))
+    for segment in quality_segments:
+        quality_video_ids.add(segment.video_id)
+        yield segment
+    for segment in iter_normalized_segments(root_path):
+        if segment.video_id not in quality_video_ids:
+            yield segment
+
+
 def build_knowledge_chunks(root: str | Path | None = None) -> list[KnowledgeChunk]:
     root_path = Path(root or ".").resolve()
     configure_local_environment(root_path)
     config = load_project_config(root_path)
     pipeline_version = config["pipeline"]["version"]
-    content_chunks = chunk_transcript_segments(iter_normalized_segments(root_path), pipeline_version)
+    content_chunks = chunk_transcript_segments(iter_segments_for_index(root_path), pipeline_version)
     chunks = [
         *content_chunks,
         *list(iter_ocr_chunks(root_path)),

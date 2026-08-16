@@ -137,7 +137,7 @@ allow_style_as_fact = false
 
     def test_runner_default_stage_command_uses_combined_catalog_offsets(self) -> None:
         runner = self.load_runner()
-        args = types.SimpleNamespace(root=Path("H:/test"), content_type="regular+livestream")
+        args = types.SimpleNamespace(root=Path("H:/cai-nghien-trading-local-rag"), content_type="regular+livestream")
         command = runner.stage_command(args, "fetch-audio", 193)
         self.assertNotIn("--content-type", command)
 

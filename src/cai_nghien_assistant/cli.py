@@ -14,9 +14,16 @@ from .chroma_index import build_chroma_index
 from .config import load_project_config
 from .frames import extract_frames_batch, ocr_frames_batch
 from .knowledge import build_knowledge_chunks
+from .knowledge_extraction.batch import run_extract_batch
+from .playbook.ask import ask_playbook
+from .playbook.assemble import assemble_video_sources
+from .playbook.compile import run_compile_playbook
+from .playbook.pages import export_playbook_pages
 from .media import fetch_audio_batch, fetch_video_light_batch
 from .paths import NON_PATH_ENV_KEYS, configure_local_environment, ensure_project_tree, resolve_project_root
 from .retrieval import SearchIndex
+from .transcript_quality.batch import run_clean_batch
+from .transcript_quality.review_ui import serve_review_ui
 from .transcripts import normalize_all_transcripts
 from .youtube_collect import collect, fetch_oldest_sidecars
 
@@ -128,6 +135,66 @@ def cmd_normalize_transcripts(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_clean_transcripts(args: argparse.Namespace) -> int:
+    result = run_clean_batch(
+        args.root,
+        limit=args.limit,
+        content_type=args.content_type,
+        offset=args.offset,
+        model_id=args.model_id,
+        engine=args.engine,
+        endpoint=args.endpoint,
+        force=args.force,
+        pause_file=args.pause_file,
+    )
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_review_ui(args: argparse.Namespace) -> int:
+    serve_review_ui(args.root, host=args.host, port=args.port)
+    return 0
+
+
+def cmd_assemble_playbook_source(args: argparse.Namespace) -> int:
+    result = assemble_video_sources(args.root, limit=args.limit, force=args.force)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_compile_playbook(args: argparse.Namespace) -> int:
+    result = run_compile_playbook(
+        args.root,
+        limit=args.limit,
+        force=args.force,
+        endpoint=args.endpoint,
+    )
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_export_pages(args: argparse.Namespace) -> int:
+    result = export_playbook_pages(args.root)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_ask(args: argparse.Namespace) -> int:
+    print(ask_playbook(args.root, args.question))
+    return 0
+
+
+def cmd_extract_knowledge(args: argparse.Namespace) -> int:
+    result = run_extract_batch(
+        args.root,
+        limit=args.limit,
+        content_type=args.content_type,
+        force=args.force,
+    )
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
 def cmd_build_index(args: argparse.Namespace) -> int:
     chunks = build_knowledge_chunks(args.root)
     index = SearchIndex.from_project(args.root)
@@ -163,7 +230,7 @@ def cmd_analyze_local(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="cnga", description="Local evidence-grounded YouTube RAG pipeline.")
+    parser = argparse.ArgumentParser(prog="cnga", description="Local YouTube knowledge playbook pipeline.")
     parser.add_argument("--root", default=".", help="Project root. Defaults to current directory.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -232,18 +299,102 @@ def build_parser() -> argparse.ArgumentParser:
     transcripts_parser.add_argument("--content-type", choices=["regular", "livestream", "short"], default=None)
     transcripts_parser.set_defaults(func=cmd_normalize_transcripts)
 
-    index_parser = subparsers.add_parser("build-index", help="Build/update local retrieval index.")
+    clean_defaults = load_project_config()
+    tq = clean_defaults.get("transcript_quality") or {}
+    default_model = str(tq.get("default_model_id") or "conservative-refine")
+    default_engine = str(tq.get("default_engine") or default_model)
+
+    clean_parser = subparsers.add_parser(
+        "clean-transcripts",
+        help="Conservative transcript clean (raw→ai_cleaned→approved), no general LLM by default.",
+    )
+    clean_parser.add_argument("--limit", type=int, default=None)
+    clean_parser.add_argument("--offset", type=int, default=0)
+    clean_parser.add_argument("--content-type", choices=["regular", "livestream", "short"], default=None)
+    clean_parser.add_argument(
+        "--model-id",
+        default=default_model,
+        help="Stored in ai_cleaned.meta (e.g. conservative-refine, rule-only, asr-reprocess).",
+    )
+    clean_parser.add_argument(
+        "--engine",
+        default=default_engine,
+        choices=["conservative-refine", "rule-only", "asr-reprocess", "llm"],
+        help="Cleaning engine. Default: conservative-refine (rules+glossary+confusion map).",
+    )
+    clean_parser.add_argument(
+        "--endpoint",
+        default=None,
+        help="LEGACY: llama.cpp URL for engine=llm only. Không khuyến nghị — chất lượng kém, dễ viết lại.",
+    )
+    clean_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Re-run when raw hash/logic/model match; skips videos already approved unless you reset review first.",
+    )
+    clean_parser.add_argument("--pause-file", default=None)
+    clean_parser.set_defaults(func=cmd_clean_transcripts)
+
+    review_parser = subparsers.add_parser("review-ui", help="Local web UI for transcript review.")
+    review_parser.add_argument("--host", default="127.0.0.1")
+    review_parser.add_argument("--port", type=int, default=8765)
+    review_parser.set_defaults(func=cmd_review_ui)
+
+    assemble_playbook_parser = subparsers.add_parser(
+        "assemble-playbook-source",
+        help="Gom lời từng video thành một file nguồn đủ ý (không cắt câu).",
+    )
+    assemble_playbook_parser.add_argument("--limit", type=int, default=None)
+    assemble_playbook_parser.add_argument("--force", action="store_true")
+    assemble_playbook_parser.set_defaults(func=cmd_assemble_playbook_source)
+
+    compile_playbook_parser = subparsers.add_parser(
+        "compile-playbook",
+        help="Video mới: viết bài (cần --endpoint) rồi gắn thêm vào chương, không viết lại cả sách.",
+    )
+    compile_playbook_parser.add_argument("--limit", type=int, default=None)
+    compile_playbook_parser.add_argument("--force", action="store_true")
+    compile_playbook_parser.add_argument(
+        "--endpoint",
+        default=None,
+        help="llama.cpp local URL, ví dụ http://127.0.0.1:8080/completion",
+    )
+    compile_playbook_parser.set_defaults(func=cmd_compile_playbook)
+
+    export_pages_parser = subparsers.add_parser(
+        "export-pages",
+        help="Xuất sách ra docs/ để bật GitHub Pages (đọc + ô hỏi).",
+    )
+    export_pages_parser.set_defaults(func=cmd_export_pages)
+
+    ask_parser = subparsers.add_parser(
+        "ask",
+        help="Hỏi kiến thức: đưa nguyên chương liên quan, không ghép mảnh.",
+    )
+    ask_parser.add_argument("question")
+    ask_parser.set_defaults(func=cmd_ask)
+
+    extract_parser = subparsers.add_parser(
+        "extract-knowledge",
+        help="[Cũ] Cắt câu thành fact. Không dùng để trả lời. Dùng cnga ask / playbook.",
+    )
+    extract_parser.add_argument("--limit", type=int, default=None)
+    extract_parser.add_argument("--content-type", choices=["regular", "livestream", "short", "regular+livestream"], default=None)
+    extract_parser.add_argument("--force", action="store_true", help="Re-write per-video facts even if facts.jsonl exists.")
+    extract_parser.set_defaults(func=cmd_extract_knowledge)
+
+    index_parser = subparsers.add_parser("build-index", help="[Optional] Build/update local FTS search index.")
     index_parser.set_defaults(func=cmd_build_index)
 
     chroma_parser = subparsers.add_parser("build-chroma", help="Build/update optional project-local Chroma index.")
     chroma_parser.set_defaults(func=cmd_build_chroma)
 
-    chat_parser = subparsers.add_parser("chat", help="Ask a question with evidence retrieval.")
+    chat_parser = subparsers.add_parser("chat", help="[Deprecated] Local chat — quality thấp, dùng extract-knowledge thay thế.")
     chat_parser.add_argument("question")
     chat_parser.add_argument("--limit", type=int, default=None)
     chat_parser.set_defaults(func=cmd_chat)
 
-    analyze_parser = subparsers.add_parser("analyze-local", help="Run reusable local LLM extraction with cache.")
+    analyze_parser = subparsers.add_parser("analyze-local", help="[Optional] LLM batch extraction — cần llama.cpp, chất lượng tùy model.")
     analyze_parser.add_argument("--endpoint", default=None)
     analyze_parser.add_argument("--model-id", default="llama.cpp-local")
     analyze_parser.add_argument("--limit", type=int, default=None)

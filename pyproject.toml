@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cai-nghien-trading-local-rag"
 version = "0.1.0"
-description = "Local evidence-grounded RAG assistant for a YouTube channel corpus."
+description = "Local knowledge extraction pipeline for a YouTube channel corpus."
 requires-python = ">=3.11,<3.13"
 dependencies = []
 
@@ -32,10 +32,14 @@ ocr = [
 chat = [
   "huggingface-hub>=0.26",
   "llama-cpp-python>=0.3.9",
+  "nvidia-cuda-runtime>=13",
+  "nvidia-cublas-cu12>=12.9",
 ]
 dev = [
   "pytest>=8.0",
 ]
+
+# GPU Windows: sau `uv sync --extra chat` chạy `.\scripts\install_chat_gpu.ps1` (build CUDA từ source).
 
 [project.scripts]
 cnga = "cai_nghien_assistant.cli:main"

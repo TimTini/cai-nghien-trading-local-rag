@@ -113,13 +113,22 @@ def extract_frames_batch(
     scene_threshold: float | None = None,
     max_frames: int | None = None,
     force: bool = False,
+    published_year: int | None = None,
+    video_id: str | None = None,
 ) -> dict[str, int]:
     root_path = Path(root or ".").resolve()
     configure_local_environment(root_path)
     config = load_project_config(root_path)
     threshold = scene_threshold if scene_threshold is not None else float(config["media"]["frame_scene_threshold"])
     max_count = max_frames if max_frames is not None else int(config["media"]["frame_max_per_video"])
-    entries = select_catalog_entries(root_path, limit=limit, content_type=content_type, offset=offset)
+    entries = select_catalog_entries(
+        root_path,
+        limit=limit,
+        content_type=content_type,
+        offset=offset,
+        published_year=published_year,
+        video_id=video_id,
+    )
     result: dict[str, int] = {}
     for index, entry in enumerate(entries, start=1):
         video_id = entry["video_id"]
@@ -255,11 +264,20 @@ def ocr_frames_batch(
     content_type: str | None = None,
     offset: int = 0,
     force: bool = False,
+    published_year: int | None = None,
+    video_id: str | None = None,
 ) -> dict[str, int]:
     root_path = Path(root or ".").resolve()
     configure_local_environment(root_path)
     config = load_project_config(root_path)
-    entries = select_catalog_entries(root_path, limit=limit, content_type=content_type, offset=offset)
+    entries = select_catalog_entries(
+        root_path,
+        limit=limit,
+        content_type=content_type,
+        offset=offset,
+        published_year=published_year,
+        video_id=video_id,
+    )
     result: dict[str, int] = {}
     for index, entry in enumerate(entries, start=1):
         video_id = entry["video_id"]
