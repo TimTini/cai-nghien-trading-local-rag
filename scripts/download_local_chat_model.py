@@ -4,7 +4,7 @@ This does not use Ollama Desktop or the Ollama model store. The model is stored
 under the current project (default: models/chat/...).
 
 Usage:
-  rtk uv run --extra chat python scripts/download_local_chat_model.py --root H:\\test
+  rtk uv run --extra chat python scripts/download_local_chat_model.py --root H:\\cai-nghien-trading-local-rag
 """
 
 from __future__ import annotations

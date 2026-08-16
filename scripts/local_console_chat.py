@@ -4,8 +4,8 @@ It loads a GGUF model from this project and uses the existing local RAG index as
 the factual source. It does not require Ollama Desktop or an Ollama server.
 
 Usage:
-  rtk uv run --extra chat python scripts/local_console_chat.py --root H:\\test
-  rtk uv run --extra chat python scripts/local_console_chat.py --root H:\\test -q "Bot DCA trên OKX là gì?"
+  rtk uv run --extra chat python scripts/local_console_chat.py --root H:\\cai-nghien-trading-local-rag
+  rtk uv run --extra chat python scripts/local_console_chat.py --root H:\\cai-nghien-trading-local-rag -q "Bot DCA trên OKX là gì?"
 """
 
 from __future__ import annotations
@@ -20,6 +20,39 @@ from typing import Any
 
 DEFAULT_CONFIG = Path("config/local_chat_model.toml")
 UNKNOWN_FALLBACK = "Tôi không biết dựa trên dữ liệu đã phân tích từ kênh này."
+
+
+def sanitize_cuda_path() -> None:
+    """Broken system CUDA_PATH (e.g. old MinerU) breaks llama_cpp import on Windows."""
+    cuda_path = os.environ.get("CUDA_PATH")
+    if cuda_path and not (Path(cuda_path) / "lib").exists():
+        os.environ.pop("CUDA_PATH", None)
+    if not os.environ.get("CUDA_PATH"):
+        default = Path(r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.3")
+        if (default / "bin" / "nvcc.exe").exists():
+            os.environ["CUDA_PATH"] = str(default)
+
+
+def add_nvidia_dll_dirs() -> None:
+    import site
+
+    site_packages = Path(site.getsitepackages()[0])
+    for relative in ("llama_cpp/lib", "nvidia/cublas/bin", "nvidia/cuda_runtime/bin"):
+        folder = site_packages / relative.replace("/", os.sep)
+        if folder.is_dir():
+            os.add_dll_directory(str(folder))
+
+    cuda_path = os.environ.get("CUDA_PATH")
+    if cuda_path:
+        toolkit = Path(cuda_path)
+        path_extra: list[str] = []
+        for sub in ("bin/x64", "bin", "lib/x64"):
+            folder = toolkit / sub.replace("/", os.sep)
+            if folder.is_dir():
+                os.add_dll_directory(str(folder))
+                path_extra.append(str(folder))
+        if path_extra:
+            os.environ["PATH"] = os.pathsep.join(path_extra) + os.pathsep + os.environ.get("PATH", "")
 
 
 def configure_stdio() -> None:
@@ -58,13 +91,9 @@ def configured_model_path(root: Path, config: dict[str, Any]) -> Path:
     return project_path(root, str(model_cfg["relative_dir"])) / str(model_cfg["filename"])
 
 
-def load_llm(model_path: Path, runtime_cfg: dict[str, Any]):
-    # Some local tools set CUDA_PATH to a private runtime that may no longer
-    # exist. llama-cpp-python checks CUDA_PATH during import, so remove only
-    # invalid values and keep valid CUDA installs intact.
-    cuda_path = os.environ.get("CUDA_PATH")
-    if cuda_path and not (Path(cuda_path) / "lib").exists():
-        os.environ.pop("CUDA_PATH", None)
+def load_llm(model_path: Path, runtime_cfg: dict[str, Any], n_gpu_layers_override: int | None = None):
+    sanitize_cuda_path()
+    add_nvidia_dll_dirs()
 
     try:
         from llama_cpp import Llama
@@ -72,11 +101,15 @@ def load_llm(model_path: Path, runtime_cfg: dict[str, Any]):
         raise RuntimeError("Missing dependency llama_cpp. Run: rtk uv sync --extra chat") from exc
 
     n_threads = int(runtime_cfg.get("n_threads") or 0) or (os.cpu_count() or 4)
+    if n_gpu_layers_override is not None:
+        n_gpu_layers = n_gpu_layers_override
+    else:
+        n_gpu_layers = int(runtime_cfg.get("n_gpu_layers", 0))
     return Llama(
         model_path=str(model_path),
         n_ctx=int(runtime_cfg.get("n_ctx", 8192)),
         n_threads=n_threads,
-        n_gpu_layers=int(runtime_cfg.get("n_gpu_layers", 0)),
+        n_gpu_layers=n_gpu_layers,
         verbose=False,
     )
 
@@ -168,6 +201,7 @@ def answer_once(llm: Any, root: Path, question: str, config: dict[str, Any], his
 
 
 def main() -> int:
+    sanitize_cuda_path()
     configure_stdio()
     parser = argparse.ArgumentParser(description="Repo-local GGUF console chatbot.")
     parser.add_argument("--root", type=Path, default=Path("."), help="Project root.")
@@ -175,6 +209,12 @@ def main() -> int:
     parser.add_argument("--model", type=Path, default=None, help="Override GGUF model path.")
     parser.add_argument("-q", "--question", default=None, help="Ask one question then exit.")
     parser.add_argument("--history-turns", type=int, default=2, help="Number of previous turns to keep.")
+    parser.add_argument(
+        "--n-gpu-layers",
+        type=int,
+        default=None,
+        help="Override config runtime.n_gpu_layers (-1 = all layers on GPU).",
+    )
     args = parser.parse_args()
 
     root = args.root.resolve()
@@ -190,7 +230,9 @@ def main() -> int:
         )
         return 2
 
-    llm = load_llm(model_path, config.get("runtime", {}))
+    runtime_cfg = dict(config.get("runtime", {}))
+    llm = load_llm(model_path, runtime_cfg, n_gpu_layers_override=args.n_gpu_layers)
+    n_gpu = args.n_gpu_layers if args.n_gpu_layers is not None else int(runtime_cfg.get("n_gpu_layers", 0))
     history: list[dict[str, str]] = []
 
     def ask(text: str) -> None:
@@ -213,6 +255,7 @@ def main() -> int:
 
     print("Chat local GGUF. Gõ 'exit' để thoát.", flush=True)
     print(f"Model: {model_path}", flush=True)
+    print(f"n_gpu_layers: {n_gpu}", flush=True)
     print("Fact rule: nếu trùng/mâu thuẫn theo thời gian, dùng evidence mới nhất.", flush=True)
     while True:
         try:

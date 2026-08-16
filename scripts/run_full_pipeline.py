@@ -315,9 +315,25 @@ def build_index(args: argparse.Namespace, root: Path, logger: Logger, state: dic
     return code
 
 
+def apply_config_defaults(root: Path, args: argparse.Namespace) -> None:
+    try:
+        from cai_nghien_assistant.config import load_project_config
+
+        fr = load_project_config(root).get("pipeline", {}).get("full_run") or {}
+    except Exception:
+        fr = {}
+    if args.beam_size is None:
+        args.beam_size = int(fr.get("beam_size") or 8)
+    if args.index_every is None:
+        args.index_every = int(fr.get("index_every") or 10)
+    if args.content_type == "regular+livestream" and fr.get("content_type"):
+        args.content_type = str(fr["content_type"])
+
+
 def run(args: argparse.Namespace) -> int:
     root = Path(args.root).resolve()
     configure_local_environment(root)
+    apply_config_defaults(root, args)
     state_label = state_content_type_label(args.content_type)
     state_path = root / "data" / "analysis" / "state" / f"full_pipeline_{state_label}.json"
     entries = catalog_entries(root, args.content_type)
@@ -467,9 +483,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-size", default="large-v3")
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--compute-type", default="float16")
-    parser.add_argument("--beam-size", type=int, default=5)
+    parser.add_argument("--beam-size", type=int, default=None, help="Default: config pipeline.full_run.beam_size or 8")
     parser.add_argument("--vad-filter", action="store_true")
-    parser.add_argument("--index-every", type=int, default=5)
+    parser.add_argument("--index-every", type=int, default=None, help="Default: config pipeline.full_run.index_every or 10")
     parser.add_argument("--stop-on-error", action="store_true")
     parser.add_argument("--status", action="store_true", help="Print artifact counts and recent failures without running.")
     return parser
