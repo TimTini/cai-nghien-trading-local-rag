@@ -6,10 +6,25 @@ async function loadPages() {
   return response.json();
 }
 
+function escapeRegex(text) {
+  const specials = ".*+?^${}()|[]\\";
+  let out = "";
+  for (const ch of text) {
+    if (specials.includes(ch)) {
+      out += "\\" + ch;
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
+
 function keywordInQuestion(needle, lowered) {
   if (needle.length <= 3) {
-    const escaped = needle.replace(/[.*+?^${}()|[\]\]/g, "\$&");
-    const re = new RegExp("(?<![a-zà-ỹ0-9])" + escaped + "(?![a-zà-ỹ0-9])", "i");
+    const re = new RegExp(
+      "(?<![a-zà-ỹ0-9])" + escapeRegex(needle) + "(?![a-zà-ỹ0-9])",
+      "i"
+    );
     return re.test(lowered);
   }
   return lowered.includes(needle);
@@ -92,11 +107,17 @@ async function onAsk(event) {
   showAnswer(parts.join("<hr>"));
 }
 
+function handleAskError(err) {
+  showAnswer("<p>Không hỏi được: " + String(err.message || err) + "</p>");
+}
+
 const form = document.getElementById("ask-form");
 if (form) {
   form.addEventListener("submit", (event) => {
-    onAsk(event).catch((err) => {
-      showAnswer("<p>Không hỏi được: " + String(err.message || err) + "</p>");
-    });
+    onAsk(event).catch(handleAskError);
   });
+  const query = new URLSearchParams(window.location.search).get("q");
+  if ((query || "").trim()) {
+    onAsk({ preventDefault() {} }).catch(handleAskError);
+  }
 }
