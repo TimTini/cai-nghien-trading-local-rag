@@ -14,7 +14,7 @@ from typing import Any
 
 from .config import load_project_config
 from .paths import configure_local_environment, to_project_relative
-from .storage import atomic_write_json, sha256_file, write_jsonl, write_jsonl_once
+from .storage import atomic_write_json, read_jsonl, sha256_file, write_jsonl, write_jsonl_once
 
 
 def _import_ytdlp():
@@ -206,6 +206,32 @@ def load_latest_catalog(root: str | Path | None = None) -> list[dict[str, Any]]:
         return []
     entries = [json.loads(line) for line in catalog_path.read_text(encoding="utf-8").splitlines() if line.strip()]
     return sort_oldest_first(entries)
+
+
+def restore_raw_catalog(root: str | Path | None = None) -> int:
+    """Restore the widest immutable raw snapshot, avoiding limited trial runs."""
+
+    root_path = Path(root or ".").resolve()
+    config = load_project_config(root_path)
+    snapshots = sorted((root_path / config["storage"]["raw_dir"] / "catalog").glob("catalog-*.jsonl"))
+    if not snapshots:
+        raise FileNotFoundError("No raw catalog snapshot found")
+    target = root_path / config["storage"]["analysis_dir"] / "state" / "latest_catalog.jsonl"
+    if target.exists():
+        raise FileExistsError(target)
+    selected: tuple[int, str, list[dict[str, Any]]] | None = None
+    for snapshot in snapshots:
+        rows = read_jsonl(snapshot)
+        ids = [str(row.get("video_id") or "") for row in rows]
+        if not ids or any(not video_id for video_id in ids) or len(ids) != len(set(ids)):
+            raise ValueError(f"Invalid raw catalog snapshot: {snapshot}")
+        candidate = (len(rows), snapshot.name, rows)
+        if selected is None or candidate[:2] > selected[:2]:
+            selected = candidate
+    assert selected is not None
+    rows = selected[2]
+    write_jsonl(target, rows, root_path)
+    return len(rows)
 
 
 def collect_channel_catalog(

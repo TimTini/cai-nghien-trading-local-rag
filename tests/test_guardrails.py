@@ -9,10 +9,11 @@ import unittest
 from pathlib import Path
 
 from cai_nghien_assistant.chat import UNKNOWN_ANSWER, answer_question
+from cai_nghien_assistant.knowledge import chunk_transcript_segments
 from cai_nghien_assistant.media import _fallback_selectors
 from cai_nghien_assistant.paths import NON_PATH_ENV_KEYS, configure_local_environment
 from cai_nghien_assistant.retrieval import SearchIndex
-from cai_nghien_assistant.schema import KnowledgeChunk
+from cai_nghien_assistant.schema import KnowledgeChunk, TranscriptSegment
 from cai_nghien_assistant.storage import RawDataExistsError, write_json_once
 
 
@@ -67,6 +68,60 @@ allow_style_as_fact = false
             source_path="data/analysis/transcripts/v1/youtube.jsonl",
             pipeline_version="test",
         )
+
+    def transcript_segment(self, video_id: str, text: str, start: float) -> TranscriptSegment:
+        return TranscriptSegment(
+            video_id=video_id,
+            title=f"Video {video_id}",
+            published_at="2024-01-01",
+            start=start,
+            end=start + 1.0,
+            text=text,
+            source_type="asr_faster_whisper",
+            source_path=f"data/analysis/transcripts/{video_id}/asr.jsonl",
+        )
+
+    def test_rag_chunks_never_mix_segments_from_different_videos(self) -> None:
+        segments = [
+            self.transcript_segment("v1", "Nội dung video một.", 0.0),
+            self.transcript_segment("v2", "Nội dung video hai.", 0.0),
+        ]
+
+        chunks = chunk_transcript_segments(segments, "test", max_chars=1200)
+
+        self.assertEqual([chunk.video_id for chunk in chunks], ["v1", "v2"])
+        self.assertEqual([chunk.text for chunk in chunks], ["Nội dung video một.", "Nội dung video hai."])
+
+    def test_rag_chunks_keep_an_asr_segment_whole_when_it_exceeds_soft_max(self) -> None:
+        long_text = "Một câu ASR dài hơn ngưỡng nhưng phải được giữ nguyên."
+        segments = [self.transcript_segment("v1", long_text, 0.0)]
+
+        chunks = chunk_transcript_segments(segments, "test", max_chars=10)
+
+        self.assertEqual(len(chunks), 1)
+        self.assertEqual(chunks[0].text, long_text)
+
+    def test_rag_chunks_keep_sentence_across_asr_segments_past_soft_max(self) -> None:
+        segments = [
+            self.transcript_segment("v1", "Nếu thị trường giảm thì", 0.0),
+            self.transcript_segment("v1", "phải giữ vốn.", 1.0),
+        ]
+
+        chunks = chunk_transcript_segments(segments, "test", max_chars=24)
+
+        self.assertEqual(len(chunks), 1)
+        self.assertEqual(chunks[0].text, "Nếu thị trường giảm thì phải giữ vốn.")
+
+    def test_rag_chunks_prefer_sentence_boundary_at_soft_max(self) -> None:
+        segments = [
+            self.transcript_segment("v1", "Câu mở đầu vẫn", 0.0),
+            self.transcript_segment("v1", "được tiếp nối.", 1.0),
+            self.transcript_segment("v1", "Câu mới.", 2.0),
+        ]
+
+        chunks = chunk_transcript_segments(segments, "test", max_chars=14)
+
+        self.assertEqual([chunk.text for chunk in chunks], ["Câu mở đầu vẫn được tiếp nối.", "Câu mới."])
 
     def test_raw_write_once_refuses_mutation(self) -> None:
         root = self.make_root()

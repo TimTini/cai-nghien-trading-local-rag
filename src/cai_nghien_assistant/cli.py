@@ -25,7 +25,7 @@ from .retrieval import SearchIndex
 from .transcript_quality.batch import run_clean_batch
 from .transcript_quality.review_ui import serve_review_ui
 from .transcripts import normalize_all_transcripts
-from .youtube_collect import collect, fetch_oldest_sidecars
+from .youtube_collect import collect, fetch_oldest_sidecars, restore_raw_catalog
 
 
 def cmd_init(args: argparse.Namespace) -> int:
@@ -49,6 +49,12 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             continue
         inside = Path(value).resolve() == root or root in Path(value).resolve().parents
         print(f"{key}={value} inside_project={inside}")
+    return 0
+
+
+def cmd_restore_catalog(args: argparse.Namespace) -> int:
+    count = restore_raw_catalog(args.root)
+    print(f"Restored {count} catalog entries from data/raw/catalog")
     return 0
 
 
@@ -239,6 +245,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     doctor_parser = subparsers.add_parser("doctor", help="Check local paths and cache env.")
     doctor_parser.set_defaults(func=cmd_doctor)
+
+    restore_parser = subparsers.add_parser("restore-catalog", help="Restore latest local raw catalog after analysis reset.")
+    restore_parser.set_defaults(func=cmd_restore_catalog)
 
     collect_parser = subparsers.add_parser("collect", help="Collect channel catalog and optional sidecars.")
     collect_parser.add_argument("--limit", type=int, default=None)

@@ -8,6 +8,7 @@ from pathlib import Path
 from ..config import load_project_config
 from ..knowledge import iter_ocr_chunks
 from ..schema import TranscriptSegment
+from ..speech_units import sentence_spans
 from ..storage import sha256_text
 from ..transcript_quality.batch import load_glossary_terms
 from .schema import KnowledgeFact
@@ -142,7 +143,7 @@ def facts_from_segments(
     pipeline_version = config["pipeline"]["version"]
     terms = domain_terms(root)
     facts: list[KnowledgeFact] = []
-    for segment in segments:
+    for segment in sentence_spans(segments):
         facts.extend(
             facts_from_segment(
                 segment,

@@ -8,6 +8,7 @@ from pathlib import Path
 from cai_nghien_assistant.knowledge_extraction.extractor import (
     classify_sentence,
     facts_from_segment,
+    facts_from_segments,
     split_sentences,
 )
 from cai_nghien_assistant.knowledge_extraction.batch import run_extract_batch
@@ -66,6 +67,13 @@ include_ocr = false
         self.assertEqual(len(facts), 1)
         self.assertEqual(facts[0].category, "guidance")
         self.assertEqual(facts[0].evidence_quote, facts[0].fact_text)
+
+    def test_fact_does_not_end_at_asr_segment_boundary(self) -> None:
+        first = TranscriptSegment("v1", "Test", "2026-01-01", 0, 4, "Nếu bot giảm thì", "transcript_approved", "approved.jsonl")
+        second = TranscriptSegment("v1", "Test", "2026-01-01", 4, 8, "phải giữ vốn.", "transcript_approved", "approved.jsonl")
+        facts = facts_from_segments([first, second], self.make_root(), min_chars=15, require_domain_term=False)
+        self.assertEqual([fact.fact_text for fact in facts], ["Nếu bot giảm thì phải giữ vốn."])
+        self.assertEqual((facts[0].start, facts[0].end), (0, 8))
 
     def test_batch_writes_corpus(self) -> None:
         root = self.make_root()

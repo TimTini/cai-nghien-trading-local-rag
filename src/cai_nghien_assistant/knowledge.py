@@ -9,6 +9,7 @@ from typing import Iterable
 from .config import load_project_config
 from .paths import configure_local_environment, to_project_relative
 from .schema import KnowledgeChunk, TranscriptSegment
+from .speech_units import sentence_spans
 from .storage import sha256_text, write_jsonl
 from .transcript_quality.iter_segments import iter_quality_segments
 from .transcripts import iter_normalized_segments
@@ -67,12 +68,16 @@ def chunk_transcript_segments(
         current = []
         current_chars = 0
 
-    for segment in segments:
-        text_len = len(segment.text)
-        if current and current_chars + text_len > max_chars:
+    for segment in sentence_spans(segments):
+        text_len = len(segment.text.strip())
+        if not text_len:
+            continue
+        if current and current[0].video_id != segment.video_id:
+            flush()
+        if current and current_chars + 1 + text_len > max_chars:
             flush()
         current.append(segment)
-        current_chars += text_len
+        current_chars += text_len + (1 if len(current) > 1 else 0)
     flush()
     return chunks
 

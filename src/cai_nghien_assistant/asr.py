@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import sysconfig
 from pathlib import Path
 from typing import Any
 
@@ -11,6 +13,22 @@ from .media import first_media_file, select_catalog_entries
 from .paths import configure_local_environment, to_project_relative
 from .schema import TranscriptSegment
 from .storage import atomic_write_json, write_jsonl
+
+
+_CUDA_DLL_HANDLES: list[object] = []
+
+
+def configure_cuda_runtime() -> None:
+    """Expose the ASR extra's NVIDIA wheels to the Windows DLL loader."""
+
+    if os.name != "nt" or _CUDA_DLL_HANDLES:
+        return
+    site_packages = Path(sysconfig.get_path("purelib"))
+    dll_dirs = [site_packages / "nvidia" / name / "bin" for name in ("cublas", "cudnn")]
+    if not all(path.is_dir() for path in dll_dirs):
+        raise RuntimeError("CUDA ASR runtime missing. Run: uv sync --extra asr")
+    os.environ["PATH"] = ";".join(str(path) for path in dll_dirs) + ";" + os.environ.get("PATH", "")
+    _CUDA_DLL_HANDLES.extend(os.add_dll_directory(str(path)) for path in dll_dirs)
 
 
 def _import_faster_whisper():
@@ -44,6 +62,8 @@ def transcribe_faster_whisper(
     if output_path.exists() and not force:
         return sum(1 for _ in output_path.open("r", encoding="utf-8"))
 
+    if device == "cuda":
+        configure_cuda_runtime()
     WhisperModel = _import_faster_whisper()
     model_download_root = root_path / config["models"]["asr_model_dir"] / "faster-whisper"
     model = WhisperModel(

@@ -59,6 +59,20 @@ def make_segment(
 
 
 class PlaybookAssembleTests(unittest.TestCase):
+    def test_source_shows_sentence_across_asr_segments_as_one_paragraph(self) -> None:
+        markdown = render_source_markdown(
+            video_id="v1",
+            title="Risk",
+            published_at="2026-01-01",
+            source_type="transcript_approved",
+            segments=[
+                make_segment(start=0, end=4, text="Nếu thị trường giảm thì"),
+                make_segment(start=4, end=8, text="phải giữ vốn."),
+            ],
+        )
+        self.assertIn("[00:00] Nếu thị trường giảm thì phải giữ vốn.", markdown)
+        self.assertNotIn("[00:04] phải giữ vốn.", markdown)
+
     def test_source_keeps_full_text_in_time_order(self) -> None:
         segments = [
             make_segment(start=10.0, end=20.0, text="Trừ khi thị trường sideway thì không vào."),

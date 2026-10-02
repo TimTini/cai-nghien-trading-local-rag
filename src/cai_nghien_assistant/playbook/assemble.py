@@ -11,6 +11,7 @@ from ..knowledge import iter_ocr_chunks, iter_segments_for_index
 from ..paths import configure_local_environment, to_project_relative
 from ..retrieval import format_timestamp
 from ..schema import TranscriptSegment
+from ..speech_units import sentence_spans
 from ..storage import atomic_write_json, atomic_write_text
 from .paths import knowledge_root, video_dir
 
@@ -35,7 +36,7 @@ def render_source_markdown(
         "## Lời thoại",
         "",
     ]
-    for segment in ordered:
+    for segment in sentence_spans(ordered):
         text = segment.text.strip()
         if not text:
             continue
